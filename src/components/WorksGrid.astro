@@ -19,6 +19,7 @@ const count = (key: FilterKey): number =>
 						type="button"
 						data-filter
 						data-filter-key={key}
+						data-cursor="Filter"
 						aria-pressed={key === 'all' ? 'true' : 'false'}
 					>
 						<span class="works__filter-label">{label}</span>

@@ -1,6 +1,6 @@
 <div class="cur" data-cur-root aria-hidden="true">
-	<span class="cur__label" data-cur-label>View</span>
-	<span class="cur__dot" data-cur-dot></span>
+	<span class="cur__main" data-cur-main>View</span>
+	<span class="cur__hint" data-cur-hint aria-hidden="true"></span>
 </div>
 
 <style>
@@ -12,54 +12,66 @@
 		pointer-events: none;
 		opacity: 0;
 	}
-	.cur__dot {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 6px;
-		height: 6px;
-		border-radius: 999px;
-		background: var(--fg);
-		box-shadow: 0 0 0 1px rgb(11 11 11 / 0.35);
+	.cur__main {
+		display: inline-block;
 	}
-	.cur__ring {
+	.cur__hint {
 		display: none;
 	}
-	.cur__label {
-		position: fixed;
-		top: 0;
-		left: 0;
+
+	/* ------- presentations ------- */
+
+	/* compact circle chip for short verbs (OPEN / FILTER / TOP …) */
+	.cur--chip {
+		width: 88px;
+		height: 88px;
 		display: grid;
 		place-items: center;
 		border-radius: 999px;
 		background: var(--fg);
 		color: var(--bg);
-		text-align: center;
-		white-space: nowrap;
-		opacity: 0;
-		transform: scale(0.5);
-	}
-
-	/* compact circle chip for short verbs (VIEW / OPEN / DRAG) */
-	.cur__label--chip {
-		width: 88px;
-		height: 88px;
 		font-size: 0.6rem;
 		font-weight: 700;
 		letter-spacing: 0.24em;
 		text-transform: uppercase;
+		overflow: hidden;
+	}
+	.cur--chip .cur__main {
+		line-height: 1;
 	}
 
-	/* expanding pill that carries the hovered project's title */
-	.cur__label--title {
-		min-width: 104px;
+	/* expanding pill that carries a title / label + small directional hint */
+	.cur--pill {
+		min-width: 128px;
 		min-height: 104px;
-		padding: 0.4rem 2.3rem;
+		padding: 0.55rem 3rem;
+		display: grid;
+		place-items: center;
+		border-radius: 999px;
+		background: var(--fg);
+		color: var(--bg);
 		font-family: var(--font-display);
 		font-style: italic;
 		font-weight: 400;
-		font-size: clamp(1.05rem, 1.7vw, 1.55rem);
+		font-size: clamp(1.15rem, 1.8vw, 1.7rem);
 		letter-spacing: 0.012em;
+		line-height: 1;
+		white-space: nowrap;
+		overflow: hidden;
+		text-align: center;
+	}
+	.cur--pill .cur__hint {
+		display: block;
+		position: absolute;
+		right: 1.05rem;
+		top: 50%;
+		translate: 0 -50%;
+		font-family: var(--font-ui);
+		font-style: normal;
+		font-size: 0.95rem;
+		font-weight: 500;
+		line-height: 1;
+		opacity: 0.5;
 	}
 
 	@media (pointer: coarse), (hover: none) {
@@ -75,6 +87,12 @@
 
 	const ACTIONABLE = 'a, button, [role="button"], input, textarea, select, summary, label[for], [data-cursor]';
 
+	/** verb chips are short; everything with a data-cursor-title becomes a pill */
+	const HINTS: Record<string, string> = {
+		title: '↗',
+		drag: '↔',
+	};
+
 	function init(): void {
 		const root = document.querySelector<HTMLElement>('[data-cur-root]');
 		if (!root) return;
@@ -83,67 +101,91 @@
 			return;
 		}
 
-		const dot = root.querySelector<HTMLElement>('[data-cur-dot]');
-		const label = root.querySelector<HTMLElement>('[data-cur-label]');
-		if (!dot || !label) return;
+		const main = root.querySelector<HTMLElement>('[data-cur-main]');
+		const hint = root.querySelector<HTMLElement>('[data-cur-hint]');
+		if (!main || !hint) return;
 
 		/* Only hide the native cursor once the custom one is fully set up;
 		   if anything below throws, the user keeps a working native cursor. */
 		scoped(root, () => {
 			document.documentElement.classList.add('has-cursor');
 
-			gsap.set(label, { xPercent: -50, yPercent: -50, x: -1000, y: -1000, autoAlpha: 0 });
-			gsap.set(dot, { xPercent: -50, yPercent: -50, x: -1000, y: -1000, autoAlpha: 0 });
+			gsap.set(root, { xPercent: -50, yPercent: -50, x: -1000, y: -1000 });
+			gsap.set(root, { autoAlpha: 0 });
 
-			const dotX = gsap.quickTo(dot, 'x', { duration: 0.14, ease: 'power2.out' });
-			const dotY = gsap.quickTo(dot, 'y', { duration: 0.14, ease: 'power2.out' });
-			const lbX = gsap.quickTo(label, 'x', { duration: 0.5, ease: 'power3.out' });
-			const lbY = gsap.quickTo(label, 'y', { duration: 0.5, ease: 'power3.out' });
+			const posX = gsap.quickTo(root, 'x', { duration: 0.5, ease: 'power3.out' });
+			const posY = gsap.quickTo(root, 'y', { duration: 0.5, ease: 'power3.out' });
 
-			let shown = false;
-			const state = { mode: 'idle', text: '' };
+			const state = { mode: 'idle', text: '', shown: false };
+			let lastBox = { w: 0, h: 0 };
 
-			/* three presentations:
-			 *   idle  — small dot only
-			 *   chip  — compact circle with a short verb (VIEW / OPEN / DRAG)
-			 *   title — expanding pill carrying the hovered project's name   */
-			const present = (mode: 'chip' | 'title', text: string): void => {
-				label.className = `cur__label cur__label--${mode}`;
-				label.textContent = text;
-				gsap.killTweensOf(label);
-				gsap.fromTo(
-					label,
-					{ autoAlpha: 0, scale: 0.5 },
-					{ autoAlpha: 1, scale: 1, duration: 0.45, ease: 'expo.out' },
-				);
+			const clearSize = (): void => {
+				root.style.removeProperty('width');
+				root.style.removeProperty('height');
 			};
 
-			const setMode = (mode: 'idle' | 'chip' | 'title', text = ''): void => {
+			const isPill = (mode: string): mode is 'title' | 'drag' => mode === 'title' || mode === 'drag';
+
+			/* paint the pill/chip with its content and return its natural size */
+			const compose = (mode: 'chip' | 'title' | 'drag', text: string): { w: number; h: number } => {
+				root.className = `cur cur--${isPill(mode) ? 'pill' : 'chip'}`;
+				main.textContent = text;
+				hint.textContent = HINTS[mode] ?? '';
+				clearSize();
+				return { w: root.offsetWidth, h: root.offsetHeight };
+			};
+
+			/* Enter a chip / title / drag state. First show scales in; swaps
+			   between visible states tween the box so the pill grows or
+			   shrinks to fit the new text instead of popping. */
+			const present = (mode: 'chip' | 'title' | 'drag', text: string): void => {
+				const first = !state.shown;
+				gsap.killTweensOf(root);
+				const to = compose(mode, text);
+
+				if (first) {
+					root.style.width = `${to.w}px`;
+					root.style.height = `${to.h}px`;
+					state.shown = true;
+					gsap.fromTo(
+						root,
+						{ autoAlpha: 0, scale: 0.5 },
+						{ autoAlpha: 1, scale: 1, duration: 0.5, ease: 'expo.out', onComplete: clearSize },
+					);
+				} else {
+					const from = lastBox.w ? lastBox : to;
+					root.style.width = `${from.w}px`;
+					root.style.height = `${from.h}px`;
+					gsap.to(root, {
+						width: to.w,
+						height: to.h,
+						autoAlpha: 1,
+						duration: 0.65,
+						ease: 'expo.out',
+						onComplete: clearSize,
+					});
+				}
+				lastBox = to;
+			};
+
+			const hide = (): void => {
+				state.shown = false;
+				gsap.killTweensOf(root);
+				clearSize();
+				gsap.to(root, { autoAlpha: 0, scale: 0.5, duration: 0.28, ease: 'power2.in' });
+			};
+
+			const setMode = (mode: 'idle' | 'chip' | 'title' | 'drag', text = ''): void => {
 				if (state.mode === mode && state.text === text) return;
 				state.mode = mode;
 				state.text = text;
-				if (mode === 'idle') {
-					gsap.to(dot, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'power2.out' });
-					gsap.to(label, { autoAlpha: 0, scale: 0.5, duration: 0.28, ease: 'power2.in' });
-				} else {
-					gsap.to(dot, { autoAlpha: 0, scale: 0.4, duration: 0.3, ease: 'power2.in' });
-					present(mode, text);
-				}
+				if (mode === 'idle') hide();
+				else present(mode, text);
 			};
 
 			const onMove = (e: MouseEvent): void => {
-				if (!shown) {
-					shown = true;
-					gsap.set(root, { autoAlpha: 1 });
-					/* nothing hovered yet — reveal the plain dot */
-					if (state.mode === 'idle') {
-						gsap.to(dot, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'power2.out' });
-					}
-				}
-				dotX(e.clientX);
-				dotY(e.clientY);
-				lbX(e.clientX);
-				lbY(e.clientY);
+				posX(e.clientX);
+				posY(e.clientY);
 			};
 
 			const hoverTarget = (e: Event): Element | null => {
@@ -159,8 +201,9 @@
 				}
 				const custom = el.closest('[data-cursor]') as HTMLElement | null;
 				const title = custom?.dataset.cursorTitle;
-				const verb = custom?.dataset.cursor;
+				const verb = (custom?.dataset.cursor ?? '').toLowerCase();
 				if (title) setMode('title', title);
+				else if (verb === 'drag') setMode('drag', 'Drag');
 				else if (verb) setMode('chip', verb);
 				else setMode('chip', 'Open');
 			};
@@ -172,11 +215,11 @@
 			};
 
 			const onLeave = (): void => {
-				gsap.to([dot, label], { autoAlpha: 0, duration: 0.3 });
+				gsap.to(root, { autoAlpha: 0, duration: 0.25 });
 			};
 			const onEnter = (): void => {
-				shown = false;
-				gsap.to([dot, label], { autoAlpha: 1, duration: 0.4 });
+				state.shown = false;
+				gsap.to(root, { autoAlpha: 1, duration: 0.3 });
 			};
 
 			window.addEventListener('mousemove', onMove, { passive: true });

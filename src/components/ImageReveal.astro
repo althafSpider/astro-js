@@ -19,8 +19,6 @@ interface Props {
 	parallax?: number;
 	/** hover zoom handled by CSS (pair with a .grp ancestor) */
 	grow?: boolean;
-	/** cursor label: e.g. "View" */
-	cursor?: string;
 	/** bottom / full legibility shade over the image */
 	shade?: 'soft' | 'full';
 	alt?: string;
@@ -39,7 +37,6 @@ const {
 	reveal = false,
 	parallax,
 	grow = false,
-	cursor,
 	shade,
 	alt,
 } = Astro.props;
@@ -53,7 +50,6 @@ const imgClass = reveal ? 'fx-img' : '';
 	data-fx={reveal ? 'clip' : undefined}
 	data-par={parallax !== undefined ? String(parallax) : undefined}
 	data-shade={shade}
-	data-cursor={cursor}
 >
 	<img
 		class={imgClass}

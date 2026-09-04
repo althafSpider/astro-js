@@ -41,10 +41,10 @@ const { projects } = Astro.props;
 								<span>{project.location}</span>
 							</div>
 							<h3 class="prj__title display display-md">
-								<a href={href} data-fx="rise">{title}</a>
+								<a href={href} data-fx="rise" data-cursor="view" data-cursor-title={title}>{title}</a>
 							</h3>
 							<p class="prj__desc" data-fx="fade">{project.description}</p>
-							<a class="prj__more u-line label label--fg" href={href}>
+							<a class="prj__more u-line label label--fg" href={href} data-cursor="view" data-cursor-title={title}>
 								View project
 								<span class="arr" aria-hidden="true">→</span>
 							</a>
@@ -76,12 +76,12 @@ const { projects } = Astro.props;
 						</div>
 						<div class="prj__center-info wrap">
 							<h3 class="prj__title display display-md" data-fx="rise">
-								<a href={href}>{title}</a>
+								<a href={href} data-cursor="view" data-cursor-title={title}>{title}</a>
 							</h3>
 							<p class="prj__desc" data-fx="fade">{project.description}</p>
 							<div class="prj__center-foot">
 								<span class="prj__meta label num">{project.category}</span>
-								<a class="prj__more u-line label label--fg" href={href}>
+								<a class="prj__more u-line label label--fg" href={href} data-cursor="view" data-cursor-title={title}>
 									View project <span class="arr" aria-hidden="true">→</span>
 								</a>
 							</div>

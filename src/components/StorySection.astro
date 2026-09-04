@@ -44,7 +44,7 @@ import { stories } from '../data/projects';
 						</h3>
 						<p class="label story__cat" data-fx="fade">{story.project.category}</p>
 						<p class="story__excerpt" data-fx="fade">{story.excerpt}</p>
-						<a class="story__more label label--fg" href={`/work/${story.project.slug}`} data-fx="fade">
+						<a class="story__more label label--fg" href={`/work/${story.project.slug}`} data-fx="fade" data-cursor="view" data-cursor-title={story.project.title}>
 							Read the story <span class="arr" aria-hidden="true">→</span>
 						</a>
 					</div>
