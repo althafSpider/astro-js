@@ -8,11 +8,14 @@ const hero = {
 };
 const year = new Date().getFullYear();
 
+/* Mixed-scale statement: small tracked caps alternate with large italic
+   lowercase so the words carry an editorial rhythm instead of four equal
+   lines of type floating over the photograph. */
 const lines = [
-	{ text: 'Visual', accent: false },
-	{ text: 'stories', accent: true },
-	{ text: 'through', accent: false },
-	{ text: 'light.', accent: true },
+	{ text: 'Visual', cap: true },
+	{ text: 'stories', it: true },
+	{ text: 'through', cap: true },
+	{ text: 'light.', it: true },
 ];
 ---
 
@@ -26,45 +29,48 @@ const lines = [
 		fetchpriority="high"
 		decoding="async"
 		sizes="100vw"
-		shade="soft"
 	/>
 	<div class="hero__veil" data-hero-veil aria-hidden="true"></div>
 
 	<div class="hero__inner wrap">
 		<div class="hero__top hero__fade" data-hero-fade data-delay="9">
-			<p class="label">Portfolio — Selected works</p>
-			<p class="label num">{site.role}</p>
+			<p class="label label--fg">{site.role}</p>
+			<p class="label num">
+				{site.location} — Est. {site.established}
+			</p>
 		</div>
 
-		<h1 class="hero__title display">
-			{
-			lines.map((line) => (
-				<span class="hero__line">
-						<span class:list={['hero__line-i', { 'it': line.accent }]}>
+		<h1 class="hero__title display">				{
+				lines.map((line) => (
+					<span class:list={['hero__line', { 'hero__line--cap': line.cap, 'hero__line--big': !line.cap }]}>
+						<span class:list={['hero__line-i', { it: line.it }]}>
 							{line.text}
 						</span>
 					</span>
-				))
-			}
+					))
+				}
 		</h1>
 
-		<div class="hero__bottom">
-			<div class="hero__meta hero__fade" data-hero-fade data-delay="11">
-				<p class="hero__lede">
-					{site.role} based in {site.location} — photographing fashion, portraits and the
-					quiet between them for {new Date().getFullYear() - site.established}+ years.
-				</p>
-				<div class="hero__facts">
-					<p><span class="label">Location</span>{site.location}</p>
-					<p><span class="label">Status</span>{site.availability}</p>
-					<p><span class="label">© {year}</span>All work — Adrian Vale</p>
-				</div>
-			</div>
+		<div class="hero__rule" aria-hidden="true"></div>
 
-			<button class="hero__scroll hero__fade" data-hero-fade data-delay="12" type="button" data-scroll-down data-cursor="Scroll" aria-label="Scroll to selected work">
-				<span class="hero__scroll-label label">Scroll</span>
-				<span class="hero__scroll-line" aria-hidden="true"></span>
-			</button>
+		<div class="hero__bottom">
+			<p class="hero__lede hero__fade" data-hero-fade data-delay="11">
+				Photographer &amp; director based in {site.location.split(',')[0]} —
+				quiet, considered images for fashion, portraits and the moments between.
+			</p>
+
+			<a
+				class="hero__goto hero__fade"
+				data-hero-fade
+				data-delay="12"
+				href="#work"
+				data-scroll-down
+				data-cursor="Open"
+			>
+				<span class="hero__goto-line" aria-hidden="true"></span>
+				<span class="hero__goto-label">View the work</span>
+				<span class="arr" aria-hidden="true">→</span>
+			</a>
 		</div>
 	</div>
 </section>
@@ -73,18 +79,36 @@ const lines = [
 	.hero {
 		position: relative;
 		height: 100svh;
-		min-height: 38rem;
+		min-height: 40rem;
 		overflow: hidden;
 		background: #0d0c0b;
 	}
 
+	/* Permanent legibility scrim under the type (never fades, unlike the
+	   load veil) so the statement stays readable after the reveal. */
+	.hero::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		background: linear-gradient(
+			to top,
+			rgb(11 11 11 / 0.92) 0%,
+			rgb(11 11 11 / 0.55) 24%,
+			rgb(11 11 11 / 0.16) 46%,
+			rgb(11 11 11 / 0) 64%
+		);
+		pointer-events: none;
+	}
+	/* Transient load veil — deepens the whole frame for the cinematic entry,
+	   then lifts so the photograph takes over (the ::after scrim stays). */
 	.hero__veil {
 		position: absolute;
 		inset: 0;
 		z-index: 2;
 		background:
-			radial-gradient(90% 70% at 70% 30%, rgb(11 11 11 / 0) 40%, rgb(11 11 11 / 0.55) 100%),
-			rgb(11 11 11 / 0.42);
+			linear-gradient(to top, rgb(11 11 11 / 0.9) 0%, rgb(11 11 11 / 0.55) 22%, rgb(11 11 11 / 0.12) 48%, rgb(11 11 11 / 0) 66%),
+			radial-gradient(92% 78% at 68% 26%, rgb(11 11 11 / 0) 42%, rgb(11 11 11 / 0.5) 100%);
 		pointer-events: none;
 	}
 
@@ -94,34 +118,72 @@ const lines = [
 		z-index: 3;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
 		padding-top: 6.6rem;
-		padding-bottom: clamp(1.6rem, 4vh, 3rem);
+		padding-bottom: clamp(1.6rem, 4vh, 3.2rem);
 	}
 
 	.hero__top {
 		display: flex;
 		justify-content: space-between;
+		align-items: baseline;
 		gap: 1rem;
 	}
 	.hero__top p {
 		margin: 0;
 	}
-
-	.hero__title {
-		font-size: clamp(3.4rem, 11.5vw, 12rem);
-		letter-spacing: -0.012em;
-		margin: 0;
-		line-height: 0.9;
+	.hero__top .label--fg {
+		color: var(--fg);
+		opacity: 0.9;
 	}
+
+	/* Statement sits in the lower field; everything above stays clear for the image. */
+	.hero__title {
+		font-size: clamp(3.6rem, 9.4vw, 10.2rem);
+		letter-spacing: -0.014em;
+		margin: auto 0 0;
+		line-height: 0.98;
+		/* soft separation where the statement crosses a bright part of the frame */
+		text-shadow:
+			0 1px 0 rgb(11 11 11 / 0.24),
+			0 6px 3.5rem rgb(11 11 11 / 0.5);
+	}
+
+	/* Every line is its own clipped mask: the reveal slides each line up
+	   inside its box so neighbouring rows never visually cross. overflow:
+	   hidden (not clip) so it also clips in every engine — and the padding
+	   gives each row ink headroom beyond the glyphs, so even a browser that
+	   somehow failed to clip could never paint one line over its neighbour. */
 	.hero__line {
 		display: block;
-		overflow: clip;
-		padding-block: 0.02em;
+		overflow: hidden;
+		padding-block: 0.12em;
 	}
 	.hero__line-i {
 		display: block;
 		will-change: transform;
+	}
+	.hero__line--big {
+		line-height: 1;
+	}
+
+	/* the small tracked caps lines — roman, wide-tracked, quiet.
+	   Font-size lives on the wrapper so the line box isn't the huge
+	   headline size; em is relative to the h1, i.e. ~0.19 × headline. */
+	.hero__line--cap {
+		font-size: 0.19em;
+		line-height: 1.6;
+		padding-block: 0.42em 0.24em;
+	}
+	.hero__line--cap .hero__line-i {
+		letter-spacing: 0.42em;
+		text-transform: uppercase;
+		opacity: 0.88;
+		margin-right: -0.42em; /* trim the trailing tracking space */
+	}
+
+	.hero__rule {
+		border-top: 1px solid var(--hairline);
+		margin-top: clamp(2.4rem, 6vh, 4.2rem);
 	}
 
 	.hero__bottom {
@@ -129,68 +191,64 @@ const lines = [
 		align-items: flex-end;
 		justify-content: space-between;
 		gap: 2rem;
-	}
-	.hero__meta {
-		max-width: 40rem;
-	}
-	.hero__lede {
-		color: var(--fg);
-		font-size: clamp(0.9rem, 1.4vw, 1.05rem);
-		line-height: 1.7;
-		max-width: 32rem;
-		margin: 0 0 1.4rem;
-		opacity: 0.92;
-	}
-	.hero__facts {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 1rem 2.6rem;
-	}
-	.hero__facts p {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		margin: 0;
-		font-size: 0.85rem;
-		color: var(--fg);
+		margin-top: clamp(1.6rem, 3.5vh, 2.6rem);
 	}
 
-	.hero__scroll {
-		display: flex;
-		flex-direction: column;
+	.hero__lede {
+		font-family: var(--font-display);
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(1.2rem, 1.75vw, 1.6rem);
+		line-height: 1.45;
+		letter-spacing: 0.002em;
+		color: var(--fg);
+		opacity: 0.86;
+		max-width: 31rem;
+		margin: 0;
+	}
+
+	.hero__goto {
+		display: inline-flex;
 		align-items: center;
 		gap: 1rem;
-		padding: 0.5rem;
+		flex-shrink: 0;
+		padding-bottom: 0.4rem;
 	}
-	.hero__scroll-label {
-		writing-mode: vertical-rl;
-		color: var(--fg);
+	.hero__goto-label {
+		font-size: clamp(1.1rem, 1.5vw, 1.45rem);
+		letter-spacing: 0.02em;
+		font-weight: 500;
 	}
-	.hero__scroll-line {
-		width: 1px;
-		height: 3.6rem;
+	.hero__goto-line {
+		width: clamp(2rem, 6vw, 4.5rem);
+		height: 1px;
 		background: var(--hairline);
 		position: relative;
 		overflow: hidden;
+		transition: width 0.8s var(--ease-out-expo);
 	}
-	.hero__scroll-line::after {
+	.hero__goto-line::after {
 		content: '';
 		position: absolute;
 		inset: 0;
 		background: var(--fg);
-		transform-origin: top;
-		animation: drip 2.6s var(--ease-out-expo) infinite;
+		transform-origin: left;
+		animation: draw 2.4s var(--ease-out-expo) infinite;
 	}
-	@keyframes drip {
+	@keyframes draw {
 		0% {
-			transform: scaleY(0);
+			transform: scaleX(0);
 		}
-		45% {
-			transform: scaleY(1);
+		55% {
+			transform: scaleX(1);
 		}
 		100% {
-			transform: scaleY(1);
-			translate: 0 100%;
+			transform: scaleX(1) translateX(100%);
+		}
+	}
+	@media (hover: hover) {
+		.hero__goto:hover .hero__goto-line {
+			width: clamp(3rem, 9vw, 6.5rem);
 		}
 	}
 
@@ -205,22 +263,22 @@ const lines = [
 
 	@media (max-width: 720px) {
 		.hero {
-			min-height: 42rem;
+			min-height: 44rem;
 		}
 		.hero__title {
-			font-size: clamp(3rem, 16vw, 5.4rem);
+			font-size: clamp(2.9rem, 15.5vw, 5.2rem);
 		}
-		.hero__top p:first-child {
+		.hero__top p:last-child {
 			display: none;
 		}
-		.hero__facts {
-			display: none;
-		}
-		.hero__scroll {
-			display: none;
+		.hero__lede {
+			font-size: 1.1rem;
+			max-width: 20rem;
 		}
 		.hero__bottom {
-			align-items: flex-end;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 1.4rem;
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {
@@ -257,23 +315,23 @@ const lines = [
 			const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
 			/* 1 · image settles from a slow zoom */
 			if (media) tl.fromTo(media, { scale: 1.14 }, { scale: 1, duration: 2.4, ease: 'power3.out' }, 0);
-			/* 2 · dark veil lifts */
-			if (veil) tl.to(veil, { autoAlpha: 0, duration: 1.7, ease: 'power2.inOut' }, 0.35);
-			/* 3 · headline rises line by line (fromTo so GSAP owns yPercent and
-			   doesn't treat the CSS translateY as pixels) */
-			tl.fromTo(lineEls, { y: 0, yPercent: 120 }, { y: 0, yPercent: 0, duration: 1.6, stagger: 0.11 }, 0.85);
+			/* 2 · dark veil lifts toward the photograph */
+			if (veil) tl.to(veil, { autoAlpha: 0, duration: 1.9, ease: 'power2.inOut' }, 0.35);
+			/* 3 · statement rises line by line (fromTo keeps GSAP on yPercent;
+			   it never treats the CSS translateY as pixel offsets) */
+			tl.fromTo(lineEls, { y: 0, yPercent: 120 }, { y: 0, yPercent: 0, duration: 1.5, stagger: 0.12 }, 0.9);
 			/* 4 · supporting metadata glides up */
 			fades.forEach((el, i) => {
-				tl.to(
-					el,
-					{ autoAlpha: 1, y: 0, duration: 1.3 },
-					1.15 + i * 0.16,
-				);
+				tl.to(el, { autoAlpha: 1, y: 0, duration: 1.25 }, 1.2 + i * 0.17);
 			});
 		});
 
-		const down = document.querySelector<HTMLButtonElement>('[data-scroll-down]');
-		down?.addEventListener('click', () => scrollTo('#work'));
+		document.querySelectorAll<HTMLElement>('[data-scroll-down]').forEach((el) => {
+			el.addEventListener('click', (e) => {
+				e.preventDefault();
+				scrollTo('#work');
+			});
+		});
 	}
 
 	onBoot(init);
