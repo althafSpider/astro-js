@@ -1,0 +1,247 @@
+---
+import ImageReveal from './ImageReveal.astro';
+import { collections } from '../data/projects';
+
+interface Props {
+	items?: typeof collections;
+}
+
+const { items = collections } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<section class="hg" data-hg aria-label="Collections">
+	<header class="wrap hg__head">
+		<p class="label" data-fx="fade">Collections — 01 / 04</p>
+		<p class="label hg__hint" data-fx="fade">
+			<span class="hg__hint-drag">Scroll <em>to move</em></span>
+			<span class="hg__hint-touch">Swipe sideways</span>
+		</p>
+	</header>
+
+	<div class="hg__pane" data-hg-pane>
+		<ul class="hg__rail" data-hg-rail data-cursor="drag">
+			{
+				items.map((c, ci) => (
+					<li class="hg__group">
+						<header class="hg__ghead">
+							<span class="hg__gno display display-md" aria-hidden="true">{c.no}</span>
+							<div class="hg__gtitle">
+								<h3 class="hg__name label">{c.title}</h3>
+								<p class="hg__note label">{c.note}</p>
+								<span class="hg__count label num">{String(c.images.length).padStart(2, '0')} frames</span>
+							</div>
+							<span class="hg__yr label num">{year - ci}</span>
+						</header>
+						<div class="hg__imgs">
+							{
+								c.images.map((img) => (
+									<a
+										class="grp hg__img"
+									href={`/work?filter=${c.filter}`}
+									data-cursor="view"
+									data-cursor-title={c.title}
+									aria-label={`${c.title} collection — ${img.alt}`}
+									>
+										<ImageReveal
+											photo={img}
+											frameClass="w-full aspect-[3/4]"
+											width={900}
+											height={1200}
+											crop="faces"
+											sizes="(min-width:1024px) 22vw, 60vw"
+											grow
+										/>
+									</a>
+								))
+							}
+						</div>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</section>
+
+<style>
+	.hg {
+		overflow: hidden;
+	}
+
+	.hg__head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-bottom: 2.6rem;
+	}
+	.hg__hint em {
+		font-style: normal;
+		color: var(--fg);
+	}
+	.hg__hint-touch {
+		display: none;
+	}
+	@media (pointer: coarse) {
+		.hg__hint-drag {
+			display: none;
+		}
+		.hg__hint-touch {
+			display: inline;
+		}
+	}
+
+	/* ---------- pane & rail ---------- */
+	.hg__pane {
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		-webkit-overflow-scrolling: touch;
+		padding-bottom: 0.4rem;
+	}
+	.hg__pane.is-bound {
+		overflow: hidden;
+	}
+	.hg__rail {
+		display: flex;
+		gap: clamp(2rem, 4vw, 4rem);
+		width: max-content;
+		padding-inline: var(--pad-x);
+		will-change: transform;
+	}
+
+	.hg__group {
+		display: flex;
+		flex-direction: column;
+		gap: 1.6rem;
+		width: max-content;
+	}
+
+	.hg__ghead {
+		display: flex;
+		align-items: flex-end;
+		gap: 1.4rem;
+		border-bottom: 1px solid var(--hairline);
+		padding-bottom: 1.2rem;
+	}
+	.hg__gno {
+		font-size: clamp(2.6rem, 5vw, 5rem);
+		line-height: 0.9;
+		color: var(--fg);
+		min-width: 2ch;
+	}
+	.hg__gtitle {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding-bottom: 0.35rem;
+	}
+	.hg__name {
+		color: var(--fg);
+		font-size: 0.8rem;
+		letter-spacing: 0.3em;
+	}
+	.hg__note {
+		font-weight: 500;
+	}
+	.hg__count {
+		margin-top: 0.5rem;
+	}
+	.hg__yr {
+		margin-left: auto;
+		align-self: flex-start;
+		color: var(--mute);
+	}
+
+	.hg__imgs {
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: min(30vw, 21rem);
+		gap: clamp(1rem, 2vw, 2rem);
+	}
+	.hg__img {
+		display: block;
+	}
+	@media (min-width: 1024px) {
+		.hg__group:first-child {
+			padding-left: 0;
+		}
+	}
+
+	@media (max-width: 720px) {
+		.hg__imgs {
+			grid-auto-columns: 62vw;
+		}
+		.hg__yr,
+		.hg__count {
+			display: none;
+		}
+	}
+</style>
+
+<script>
+	import gsap from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { onBoot, scoped, reducedMotion, finePointer } from '../scripts/app';
+
+	function init(): void {
+		const root = document.querySelector<HTMLElement>('[data-hg]');
+		if (!root) return;
+		const pane = root.querySelector<HTMLElement>('[data-hg-pane]');
+		const rail = root.querySelector<HTMLElement>('[data-hg-rail]');
+		if (!pane || !rail) return;
+
+		const desktop = window.matchMedia('(min-width: 1024px)').matches;
+
+		if (!desktop || reducedMotion() || !finePointer()) {
+			pane.classList.remove('is-bound');
+			return;
+		}
+
+		scoped(root, () => {
+			const distance = () => Math.max(0, rail.scrollWidth - window.innerWidth);
+
+			const tween = gsap.to(rail, {
+				x: () => -distance(),
+				ease: 'none',
+				scrollTrigger: {
+					trigger: root,
+					start: 'top top',
+					end: () => `+=${distance() + window.innerHeight * 0.6}`,
+					scrub: 1,
+					pin: true,
+					anticipatePin: 1,
+					invalidateOnRefresh: true,
+				},
+			});
+
+			pane.classList.add('is-bound');
+			const onResize = () => ScrollTrigger.refresh();
+			window.addEventListener('resize', onResize);
+			// release horizontal native scroll while pinned
+			pane.scrollLeft = 0;
+
+			/* reveal each collection header as it arrives */
+			root.querySelectorAll<HTMLElement>('.hg__group').forEach((group, i) => {
+				gsap.fromTo(
+					group,
+					{ autoAlpha: 0, y: 30 },
+					{
+						autoAlpha: 1,
+						y: 0,
+						duration: 1,
+						delay: 0.08 * i,
+						ease: 'expo.out',
+						scrollTrigger: {
+							trigger: group,
+							containerAnimation: tween,
+							start: 'left 92%',
+							toggleActions: 'play none none none',
+						},
+					},
+				);
+			});
+		});
+	}
+
+	onBoot(init);
+</script>

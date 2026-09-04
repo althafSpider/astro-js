@@ -1,0 +1,312 @@
+---
+import ImageReveal from './ImageReveal.astro';
+import type { Project } from '../data/projects';
+
+interface Props {
+	projects: Project[];
+}
+
+const { projects } = Astro.props;
+---
+
+<div class="showcase">
+	{
+		projects.map((project) => {
+			const href = `/work/${project.slug}`;
+			const title = project.title;
+
+			if (project.featured === 'splitL' || project.featured === 'splitR') {
+				const right = project.featured === 'splitR';
+				return (
+					<article class:list={['prj prj--split wrap', { 'is-right': right }]} data-prj>
+						<div class="prj__media">
+							<a class="grp prj__media-link" href={href} data-cursor="view" data-cursor-title={title} aria-label={`${title} — view project`}>
+								<ImageReveal
+									photo={project.cover}
+									frameClass="w-full aspect-[4/3] sm:aspect-[7/5] lg:aspect-[7/5]"
+									width={2000}
+									height={1500}
+									sizes="(min-width:1024px) 55vw, 92vw"
+									reveal
+									grow
+								/>
+								<span class="prj__tag label"><span class="num">Project {project.index}</span> — {project.category}</span>
+							</a>
+						</div>
+
+						<div class="prj__info">
+							<div class="prj__meta label num">
+								<span>{project.year}</span>
+								<span class="prj__dot" aria-hidden="true"></span>
+								<span>{project.location}</span>
+							</div>
+							<h3 class="prj__title display display-md">
+								<a href={href} data-fx="rise">{title}</a>
+							</h3>
+							<p class="prj__desc" data-fx="fade">{project.description}</p>
+							<a class="prj__more u-line label label--fg" href={href}>
+								View project
+								<span class="arr" aria-hidden="true">→</span>
+							</a>
+						</div>
+					</article>
+				);
+			}
+
+			if (project.featured === 'center') {
+				return (
+					<article class="prj prj--center" data-prj>
+						<div class="prj__center-head wrap label num">
+							<span><span class="label">Project</span> {project.index}</span>
+							<span>{project.year} — {project.location}</span>
+						</div>
+						<div class="prj__center-media wrap">
+							<a class="grp" href={href} data-cursor="view" data-cursor-title={title} aria-label={`${title} — view project`}>
+								<ImageReveal
+									photo={project.cover}
+									frameClass="w-full max-w-[22rem] sm:max-w-[26rem] lg:max-w-[30rem] mx-auto aspect-[3/4]"
+									width={1400}
+									height={1800}
+									crop="faces"
+									sizes="(min-width:1024px) 480px, 80vw"
+									reveal
+									grow
+								/>
+							</a>
+						</div>
+						<div class="prj__center-info wrap">
+							<h3 class="prj__title display display-md" data-fx="rise">
+								<a href={href}>{title}</a>
+							</h3>
+							<p class="prj__desc" data-fx="fade">{project.description}</p>
+							<div class="prj__center-foot">
+								<span class="prj__meta label num">{project.category}</span>
+								<a class="prj__more u-line label label--fg" href={href}>
+									View project <span class="arr" aria-hidden="true">→</span>
+								</a>
+							</div>
+						</div>
+					</article>
+				);
+			}
+
+			/* full-bleed cinematic */
+			return (
+				<article class="prj prj--full" data-prj>
+					<a class="grp prj__full-link" href={href} data-cursor="view" data-cursor-title={title} aria-label={`${title} — view project`}>
+						<ImageReveal
+							photo={project.cover}
+							frameClass="w-full h-[68vh] sm:h-[78vh] lg:h-[88vh]"
+							width={2600}
+							height={1400}
+							sizes="100vw"
+							reveal
+							grow
+						/>
+						<span class="prj__scrim" aria-hidden="true"></span>
+						<span class="wrap prj__full-content">
+							<span class="prj__tag label"><span class="num">Project {project.index}</span> — {project.category}</span>
+							<span class="prj__full-bottom">
+								<span class="prj__title display display-lg">{title}</span>
+								<span class="prj__cta label label--fg">
+									View series <span class="arr" aria-hidden="true">→</span>
+								</span>
+							</span>
+						</span>
+					</a>
+				</article>
+			);
+		})
+	}
+</div>
+
+<style>
+	.showcase {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(6rem, 14vh, 11rem);
+	}
+
+	/* ---------- shared ---------- */
+	.prj__tag {
+		position: absolute;
+		top: 1rem;
+		left: 1rem;
+		z-index: 3;
+		padding: 0.5rem 0.85rem;
+		background: rgb(11 11 11 / 0.55);
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
+		color: var(--fg);
+		border: 1px solid rgb(242 240 235 / 0.14);
+		border-radius: 999px;
+	}
+	.prj__meta {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.7rem;
+	}
+	.prj__dot {
+		width: 3px;
+		height: 3px;
+		border-radius: 999px;
+		background: var(--mute);
+	}
+	.prj__title {
+		margin: 0;
+	}
+	.prj__title a {
+		display: inline-block;
+		transition: transform 0.8s var(--ease-out-expo);
+	}
+	.prj__title .it {
+		font-style: italic;
+		font-weight: 300;
+	}
+	.prj__desc {
+		color: var(--mute);
+		font-size: 0.95rem;
+		line-height: 1.8;
+		max-width: 30rem;
+		margin: 0;
+	}
+	.prj__more {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		color: var(--fg);
+	}
+	.prj__more .arr {
+		font-size: 1.1em;
+	}
+
+	/* ---------- split ---------- */
+	.prj--split {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2.5rem 0;
+	}
+	.prj--split .prj__media-link {
+		position: relative;
+		display: block;
+	}
+	.prj--split .prj__info {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 1.6rem;
+		justify-content: center;
+	}
+	@media (min-width: 1024px) {
+		.prj--split {
+			grid-template-columns: repeat(12, 1fr);
+			column-gap: clamp(2rem, 5vw, 5rem);
+			align-items: center;
+		}
+		.prj--split .prj__media {
+			grid-column: span 7;
+		}
+		.prj--split .prj__info {
+			grid-column: span 5;
+		}
+		.prj--split.is-right .prj__media {
+			grid-column: 6 / -1;
+		}
+		.prj--split.is-right .prj__info {
+			grid-column: 1 / span 5;
+		}
+	}
+	@media (hover: hover) {
+		.prj:hover .prj__title a {
+			transform: translateX(1.1rem);
+		}
+	}
+
+	/* ---------- center ---------- */
+	.prj--center {
+		display: flex;
+		flex-direction: column;
+		gap: 2.2rem;
+	}
+	.prj--center-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	.prj--center-head .label {
+		color: var(--fg);
+	}
+	.prj--center-head span:first-child .label {
+		color: var(--mute);
+	}
+	.prj--center-media a {
+		position: relative;
+		display: block;
+	}
+	.prj--center-info {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.2rem;
+		text-align: center;
+	}
+	.prj--center-info .prj__title {
+		font-size: clamp(2.4rem, 6vw, 5rem);
+	}
+	.prj--center-info .prj__desc {
+		margin-inline: auto;
+	}
+	.prj--center-foot {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		gap: 1.4rem 2.6rem;
+		padding-top: 1.6rem;
+		width: 100%;
+		border-top: 1px solid var(--hairline);
+	}
+	.prj--center-foot .prj__meta {
+		color: var(--fg);
+	}
+
+	/* ---------- full ---------- */
+	.prj--full-link {
+		position: relative;
+		display: block;
+	}
+	.prj__scrim {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		background: linear-gradient(to top, rgb(11 11 11 / 0.78) 0%, rgb(11 11 11 / 0.1) 46%, transparent 70%);
+		pointer-events: none;
+	}
+	.prj__full-content {
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding-block: 1.6rem clamp(1.6rem, 5vh, 3rem);
+	}
+	.prj__full-content .prj__tag {
+		position: static;
+		align-self: flex-start;
+	}
+	.prj__full-bottom {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 2rem;
+	}
+	.prj--full .prj__title {
+		font-size: clamp(2.6rem, 7vw, 7rem);
+		text-shadow: 0 1px 30px rgb(0 0 0 / 0.4);
+	}
+	.prj__cta {
+		white-space: nowrap;
+		padding-bottom: 0.6rem;
+	}
+</style>

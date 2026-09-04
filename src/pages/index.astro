@@ -1,11 +1,48 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import ProjectShowcase from '../components/ProjectShowcase.astro';
+import HorizontalGallery from '../components/HorizontalGallery.astro';
+import StorySection from '../components/StorySection.astro';
+import AboutPreview from '../components/AboutPreview.astro';
+import { projects } from '../data/projects';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const featured = projects.filter((p) => p.featured);
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Adrian Vale — Photographer & Director">
+	<Hero />
+
+	<!-- ------------------------------------------------- selected work -->
+	<section class="sec" id="work">
+		<header class="wrap section-head">
+			<p class="label" data-fx-lines>
+				<span class="l-line"><span class="l-i">Selected work — 01</span></span>
+			</p>
+			<a class="section-more label" href="/work" data-fx="fade">
+				All projects <span class="arr" aria-hidden="true">→</span>
+			</a>
+		</header>
+
+		<ProjectShowcase projects={featured} />
+	</section>
+
+	<!-- -------------------------------------------- horizontal collections -->
+	<div class="sec hg-sec">
+		<HorizontalGallery />
+	</div>
+
+	<!-- -------------------------------------------------- selected stories -->
+	<section class="sec story-sec">
+		<StorySection />
+	</section>
+
+	<!-- ------------------------------------------------- about teaser -->
+	<AboutPreview />
 </Layout>
+
+<style>
+	.story-sec {
+		padding-top: clamp(2rem, 4vh, 3rem);
+	}
+</style>

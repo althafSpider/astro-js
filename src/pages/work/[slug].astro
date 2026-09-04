@@ -1,0 +1,486 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ImageReveal from '../../components/ImageReveal.astro';
+import ProjectGallery from '../../components/ProjectGallery.astro';
+import { projects, bySlug, neighbours } from '../../data/projects';
+
+export function getStaticPaths() {
+	return projects.map((project) => ({ params: { slug: project.slug } }));
+}
+
+const { slug } = Astro.params;
+const project = bySlug(slug!);
+if (!project) throw new Error(`Unknown project slug: ${slug}`);
+const { prev, next } = neighbours(slug!);
+const total = projects.length;
+const imgCount = project.body.filter((b) => b.type !== 'text').length;
+---
+
+<Layout title={project.title} description={project.description}>
+	<!-- ---------------------------------------------- cinematic hero -->
+	<section class="phero" data-project-hero>
+		<ImageReveal
+			photo={project.cover}
+			frameClass="absolute inset-0 h-full w-full"
+			width={2600}
+			height={1700}
+			loading="eager"
+			fetchpriority="high"
+			decoding="async"
+			sizes="100vw"
+			shade="soft"
+		/>
+		<div class="phero__veil" data-hero-veil aria-hidden="true"></div>
+
+		<div class="phero__inner wrap">
+			<p class="phero__tag label phero__fade" data-hero-fade data-delay="8">
+				<span class="num">Project {project.index}</span>
+				<span class="phero__dot" aria-hidden="true"></span>
+				{project.category}
+			</p>
+
+			<div class="phero__bottom">
+				<h1 class="phero__title display">
+					<span class="phero__line">
+						<span class="phero__line-i">{project.title}</span>
+					</span>
+				</h1>
+				<div class="phero__facts phero__fade" data-hero-fade data-delay="10">
+					<p><span class="label">Year</span>{project.year}</p>
+					<p><span class="label">Location</span>{project.location}</p>
+					<p><span class="label">Format</span>{imgCount} images</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- --------------------------------------------------- meta bar -->
+	<div class="wrap pmeta" data-fx="fade">
+		<div class="pmeta__cell">
+			<span class="label">Index</span>
+			<span class="num pmeta__val">{project.index} / {String(total).padStart(2, '0')}</span>
+		</div>
+		<div class="pmeta__cell">
+			<span class="label">Discipline</span>
+			<span class="pmeta__val">{project.category}</span>
+		</div>
+		<div class="pmeta__cell">
+			<span class="label">Role</span>
+			<span class="pmeta__val">{project.role}</span>
+		</div>
+		<div class="pmeta__cell">
+			<span class="label">Year</span>
+			<span class="pmeta__val num">{project.year}</span>
+		</div>
+	</div>
+
+	<!-- ----------------------------------------------- the story -->
+	<section class="wrap">
+		<p class="pdeco display display-sm" data-fx-lines>
+			<span class="l-line"><span class="l-i">{project.description}</span></span>
+		</p>
+		<ProjectGallery project={project} />
+	</section>
+
+	<!-- -------------------------------------------------- prev / next -->
+	<section class="pn" data-pn>
+		<span class="pn__thumb" data-pn-thumb data-cursor="view" aria-hidden="true">
+			<span class="pn__thumb-img">
+				<img data-pn-img alt="" width="640" height="800" loading="lazy" />
+			</span>
+		</span>
+
+		<div class="wrap pn__row">
+			<a class="pn__link grp" href={`/work/${prev.slug}`} data-pn-link data-pn-src={prev.cover.slug} data-pn-alt={prev.cover.alt} data-cursor="view" data-cursor-title={prev.title}>
+				<span class="label pn__kicker">Previous project</span>
+				<span class="pn__inner">
+					<span class="pn__no display display-sm num">{prev.index}</span>
+					<span class="pn__name display display-lg">{prev.title}</span>
+					<span class="pn__arr label label--fg" aria-hidden="true">
+						View project <span class="arr">←</span>
+					</span>
+				</span>
+			</a>
+
+			<a class="pn__link grp pn__link--next" href={`/work/${next.slug}`} data-pn-link data-pn-src={next.cover.slug} data-pn-alt={next.cover.alt} data-cursor="view" data-cursor-title={next.title}>
+				<span class="label pn__kicker">Next project</span>
+				<span class="pn__inner pn__inner--right">
+					<span class="pn__no display display-sm num">{next.index}</span>
+					<span class="pn__name display display-lg">{next.title}</span>
+					<span class="pn__arr label label--fg" aria-hidden="true">
+						View project <span class="arr">→</span>
+					</span>
+				</span>
+			</a>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	/* --------------------------------------------------------- hero */
+	.phero {
+		position: relative;
+		height: 100svh;
+		min-height: 42rem;
+		overflow: hidden;
+		background: #0d0c0b;
+	}
+	.phero__veil {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		background:
+			radial-gradient(110% 90% at 78% 20%, rgb(11 11 11 / 0) 44%, rgb(11 11 11 / 0.6) 100%),
+			rgb(11 11 11 / 0.3);
+		pointer-events: none;
+	}
+	.phero__inner {
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding-top: 6.4rem;
+		padding-bottom: clamp(1.4rem, 4vh, 3rem);
+	}
+
+	.phero__tag {
+		display: inline-flex;
+		align-items: center;
+		align-self: flex-start;
+		gap: 0.7rem;
+		padding: 0.5rem 0.95rem;
+		background: rgb(11 11 11 / 0.4);
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
+		border: 1px solid rgb(242 240 235 / 0.16);
+		border-radius: 999px;
+		color: var(--fg);
+	}
+	.phero__dot {
+		width: 3px;
+		height: 3px;
+		border-radius: 999px;
+		background: var(--mute);
+	}
+
+	.phero__bottom {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 2rem;
+	}
+	.phero__line {
+		display: block;
+		overflow: clip;
+		padding-block: 0.03em;
+	}
+	.phero__line-i {
+		display: block;
+		will-change: transform;
+	}
+	.phero__title {
+		margin: 0;
+		font-size: clamp(3.2rem, 9vw, 9.5rem);
+		line-height: 0.9;
+		text-shadow: 0 1px 40px rgb(0 0 0 / 0.35);
+	}
+	.phero__facts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem 2.4rem;
+		padding-bottom: 0.8rem;
+	}
+	.phero__facts p {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		margin: 0;
+		font-size: 0.85rem;
+	}
+
+	/* entrance initial states */
+	html.js .phero__line-i {
+		transform: translateY(120%);
+	}
+	html.js .phero__fade {
+		opacity: 0;
+		transform: translateY(1.1rem);
+	}
+
+	@media (max-width: 720px) {
+		.phero {
+			min-height: 44rem;
+		}
+		.phero__title {
+			font-size: clamp(2.8rem, 13.5vw, 5rem);
+		}
+		.phero__bottom {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 1.6rem;
+		}
+		.phero__facts {
+			display: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html.js .phero__line-i,
+		html.js .phero__fade {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	/* ------------------------------------------------------ meta bar */
+	.pmeta {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		border-bottom: 1px solid var(--hairline);
+	}
+	.pmeta__cell {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: clamp(1.3rem, 3vh, 2rem) 1.4rem;
+		border-bottom: 1px solid var(--hairline);
+	}
+	.pmeta__cell:first-child {
+		padding-left: 0;
+	}
+	.pmeta__val {
+		font-family: var(--font-display);
+		font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+		font-style: italic;
+	}
+	@media (min-width: 900px) {
+		.pmeta {
+			grid-template-columns: repeat(4, 1fr);
+		}
+		.pmeta__cell {
+			border-bottom: 0;
+			border-left: 1px solid var(--hairline);
+		}
+		.pmeta__cell:nth-child(1) {
+			border-left: 0;
+			padding-left: 0;
+		}
+		.pmeta__cell:not(:first-child) {
+			padding-left: 1.8rem;
+		}
+	}
+
+	/* ------------------------------------------------- description */
+	.pdeco {
+		margin: 0;
+		padding-top: clamp(3.5rem, 8vh, 6rem);
+		max-width: 30ch;
+		font-style: italic;
+		font-weight: 300;
+		font-size: clamp(1.5rem, 3vw, 2.6rem);
+		line-height: 1.3;
+		color: var(--fg);
+	}
+	.pdeco .l-line {
+		overflow: clip;
+	}
+
+	/* ----------------------------------------------------- prev next */
+	.pn {
+		position: relative;
+		margin-top: clamp(7rem, 16vh, 12rem);
+		border-top: 1px solid var(--hairline);
+	}
+	.pn__row {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+	.pn__link {
+		display: block;
+		position: relative;
+		padding-block: clamp(1.8rem, 4.5vh, 3rem);
+		border-bottom: 1px solid var(--hairline);
+	}
+	.pn__link--next {
+		text-align: right;
+	}
+	.pn__kicker {
+		display: block;
+		margin-bottom: 1.2rem;
+		color: var(--mute);
+	}
+	.pn__inner {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		align-items: flex-start;
+		transition: transform 0.8s var(--ease-out-expo);
+	}
+	.pn__link--next .pn__inner {
+		align-items: flex-end;
+	}
+	.pn__no {
+		font-size: clamp(1.1rem, 1.8vw, 1.6rem);
+		color: var(--mute);
+	}
+	.pn__name {
+		margin: 0;
+		font-size: clamp(2.2rem, 6vw, 5.6rem);
+		line-height: 1.02;
+	}
+	.pn__arr {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1.2rem;
+		color: var(--fg);
+	}
+	.pn__arr .arr {
+		font-size: 1.3em;
+	}
+
+	@media (hover: hover) {
+		.pn__link:hover .pn__inner {
+			transform: translateX(0.9rem);
+		}
+		.pn__link--next:hover .pn__inner {
+			transform: translateX(-0.9rem);
+		}
+	}
+
+	/* floating preview thumb */
+	.pn__thumb {
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 90;
+		width: clamp(13rem, 22vw, 21rem);
+		pointer-events: none;
+		opacity: 0;
+	}
+	.pn__thumb-img {
+		display: block;
+		aspect-ratio: 4 / 5;
+		overflow: hidden;
+		background: #14130f;
+	}
+	.pn__thumb-img img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transform: scale(1.06);
+	}
+	@media (pointer: coarse) {
+		.pn__thumb {
+			display: none;
+		}
+	}
+	@media (max-width: 1023px) {
+		.pn__row {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.pn__row {
+			grid-template-columns: 1fr 1fr;
+		}
+		.pn__link {
+			padding-inline: clamp(0rem, 3vw, 3.5rem);
+		}
+		.pn__link:first-child {
+			border-right: 1px solid var(--hairline);
+		}
+		.pn__link:not(:first-child) {
+			border-bottom: 1px solid var(--hairline);
+		}
+	}
+</style>
+
+<script>
+	import gsap from 'gsap';
+	import { onBoot, scoped, reducedMotion } from '../../scripts/app';
+	import { src } from '../../data/images';
+
+	function initHero(): void {
+		const hero = document.querySelector<HTMLElement>('[data-project-hero]');
+		if (!hero) return;
+
+		scoped(hero, () => {
+			const veil = hero.querySelector<HTMLElement>('[data-hero-veil]');
+			const fades = Array.from(hero.querySelectorAll<HTMLElement>('[data-hero-fade]'));
+			const line = hero.querySelector<HTMLElement>('.phero__line-i');
+			const media = hero.querySelector<HTMLElement>('.avm');
+
+			if (reducedMotion()) {
+				gsap.set([line, fades], { clearProps: 'all' });
+				gsap.set(veil, { autoAlpha: 0 });
+				return;
+			}
+
+			const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+			if (media) tl.fromTo(media, { scale: 1.16 }, { scale: 1, duration: 2.3, ease: 'power3.out' }, 0);
+			if (veil) tl.to(veil, { autoAlpha: 0, duration: 1.6, ease: 'power2.inOut' }, 0.3);
+			if (line) tl.fromTo(line, { y: 0, yPercent: 120 }, { y: 0, yPercent: 0, duration: 1.6 }, 0.8);
+			fades.forEach((el, i) => tl.to(el, { autoAlpha: 1, y: 0, duration: 1.2 }, 1 + i * 0.15));
+		});
+	}
+
+	function initPrevNext(): void {
+		const pn = document.querySelector<HTMLElement>('[data-pn]');
+		if (!pn) return;
+
+		const links = Array.from(pn.querySelectorAll<HTMLAnchorElement>('[data-pn-link]'));
+		const thumb = pn.querySelector<HTMLElement>('[data-pn-thumb]');
+		const img = pn.querySelector<HTMLImageElement>('[data-pn-img]');
+		if (links.length === 0 || !thumb || !img) return;
+
+		const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+		if (!canHover) return;
+
+		scoped(pn, () => {
+			const shown = { value: false };
+			gsap.set(thumb, { xPercent: -50, yPercent: 20, autoAlpha: 0, scale: 0.92 });
+			const thumbX = gsap.quickTo(thumb, 'x', { duration: 0.5, ease: 'power3.out' });
+			const thumbY = gsap.quickTo(thumb, 'y', { duration: 0.5, ease: 'power3.out' });
+
+			/* the section's viewport band, so the preview never escapes it */
+			const band = () => {
+				const r = pn.getBoundingClientRect();
+				return { top: r.top, bottom: r.bottom };
+			};
+
+			const move = (e: MouseEvent): void => {
+				if (!shown.value) return;
+				thumbX(e.clientX);
+				const b = band();
+				const y = Math.min(Math.max(e.clientY, b.top + 60), b.bottom - 60);
+				thumbY(y);
+			};
+
+			links.forEach((link) => {
+				link.addEventListener('mouseenter', () => {
+					const s = link.dataset.pnSrc;
+					const alt = link.dataset.pnAlt ?? '';
+					if (!s) return;
+					img.src = src({ slug: s, alt }, 640, 800, 'faces');
+					shown.value = true;
+					gsap.to(thumb, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'expo.out' });
+				});
+				link.addEventListener('mouseleave', () => {
+					shown.value = false;
+					gsap.to(thumb, { autoAlpha: 0, scale: 0.92, duration: 0.35, ease: 'power2.in' });
+				});
+			});
+
+			window.addEventListener('mousemove', move, { passive: true });
+		});
+	}
+
+	onBoot(() => {
+		initHero();
+		initPrevNext();
+	});
+</script>

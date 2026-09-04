@@ -1,0 +1,280 @@
+---
+import ImageReveal from './ImageReveal.astro';
+import { site } from '../data/site';
+
+const hero = {
+	slug: 'photo-1524504388940-b1c1722653e1',
+	alt: 'Studio fashion portrait — model in a beam of light against a dark backdrop',
+};
+const year = new Date().getFullYear();
+
+const lines = [
+	{ text: 'Visual', accent: false },
+	{ text: 'stories', accent: true },
+	{ text: 'through', accent: false },
+	{ text: 'light.', accent: true },
+];
+---
+
+<section class="hero" data-hero aria-label="Introduction">
+	<ImageReveal
+		photo={{ slug: hero.slug, alt: hero.alt }}
+		frameClass="absolute inset-0"
+		width={2400}
+		height={1500}
+		loading="eager"
+		fetchpriority="high"
+		decoding="async"
+		sizes="100vw"
+		shade="soft"
+	/>
+	<div class="hero__veil" data-hero-veil aria-hidden="true"></div>
+
+	<div class="hero__inner wrap">
+		<div class="hero__top hero__fade" data-hero-fade data-delay="9">
+			<p class="label">Portfolio — Selected works</p>
+			<p class="label num">{site.role}</p>
+		</div>
+
+		<h1 class="hero__title display">
+			{
+			lines.map((line) => (
+				<span class="hero__line">
+						<span class:list={['hero__line-i', { 'it': line.accent }]}>
+							{line.text}
+						</span>
+					</span>
+				))
+			}
+		</h1>
+
+		<div class="hero__bottom">
+			<div class="hero__meta hero__fade" data-hero-fade data-delay="11">
+				<p class="hero__lede">
+					{site.role} based in {site.location} — photographing fashion, portraits and the
+					quiet between them for {new Date().getFullYear() - site.established}+ years.
+				</p>
+				<div class="hero__facts">
+					<p><span class="label">Location</span>{site.location}</p>
+					<p><span class="label">Status</span>{site.availability}</p>
+					<p><span class="label">© {year}</span>All work — Adrian Vale</p>
+				</div>
+			</div>
+
+			<button class="hero__scroll hero__fade" data-hero-fade data-delay="12" type="button" data-scroll-down aria-label="Scroll to selected work">
+				<span class="hero__scroll-label label">Scroll</span>
+				<span class="hero__scroll-line" aria-hidden="true"></span>
+			</button>
+		</div>
+	</div>
+</section>
+
+<style>
+	.hero {
+		position: relative;
+		height: 100svh;
+		min-height: 38rem;
+		overflow: hidden;
+		background: #0d0c0b;
+	}
+
+	.hero__veil {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		background:
+			radial-gradient(90% 70% at 70% 30%, rgb(11 11 11 / 0) 40%, rgb(11 11 11 / 0.55) 100%),
+			rgb(11 11 11 / 0.42);
+		pointer-events: none;
+	}
+
+	.hero__inner {
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding-top: 6.6rem;
+		padding-bottom: clamp(1.6rem, 4vh, 3rem);
+	}
+
+	.hero__top {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+	.hero__top p {
+		margin: 0;
+	}
+
+	.hero__title {
+		font-size: clamp(3.4rem, 11.5vw, 12rem);
+		letter-spacing: -0.012em;
+		margin: 0;
+		line-height: 0.9;
+	}
+	.hero__line {
+		display: block;
+		overflow: clip;
+		padding-block: 0.02em;
+	}
+	.hero__line-i {
+		display: block;
+		will-change: transform;
+	}
+
+	.hero__bottom {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 2rem;
+	}
+	.hero__meta {
+		max-width: 40rem;
+	}
+	.hero__lede {
+		color: var(--fg);
+		font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+		line-height: 1.7;
+		max-width: 32rem;
+		margin: 0 0 1.4rem;
+		opacity: 0.92;
+	}
+	.hero__facts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem 2.6rem;
+	}
+	.hero__facts p {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		margin: 0;
+		font-size: 0.85rem;
+		color: var(--fg);
+	}
+
+	.hero__scroll {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		padding: 0.5rem;
+	}
+	.hero__scroll-label {
+		writing-mode: vertical-rl;
+		color: var(--fg);
+	}
+	.hero__scroll-line {
+		width: 1px;
+		height: 3.6rem;
+		background: var(--hairline);
+		position: relative;
+		overflow: hidden;
+	}
+	.hero__scroll-line::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: var(--fg);
+		transform-origin: top;
+		animation: drip 2.6s var(--ease-out-expo) infinite;
+	}
+	@keyframes drip {
+		0% {
+			transform: scaleY(0);
+		}
+		45% {
+			transform: scaleY(1);
+		}
+		100% {
+			transform: scaleY(1);
+			translate: 0 100%;
+		}
+	}
+
+	/* hidden until the load timeline runs */
+	html.js .hero__line-i {
+		transform: translateY(120%);
+	}
+	html.js .hero__fade {
+		opacity: 0;
+		transform: translateY(1.2rem);
+	}
+
+	@media (max-width: 720px) {
+		.hero {
+			min-height: 42rem;
+		}
+		.hero__title {
+			font-size: clamp(3rem, 16vw, 5.4rem);
+		}
+		.hero__top p:first-child {
+			display: none;
+		}
+		.hero__facts {
+			display: none;
+		}
+		.hero__scroll {
+			display: none;
+		}
+		.hero__bottom {
+			align-items: flex-end;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		html.js .hero__line-i,
+		html.js .hero__fade {
+			opacity: 1;
+			transform: none;
+		}
+	}
+</style>
+
+<script>
+	import gsap from 'gsap';
+	import { onBoot, scoped, reducedMotion, scrollTo } from '../scripts/app';
+
+	function init(): void {
+		const hero = document.querySelector<HTMLElement>('[data-hero]');
+		if (!hero) return;
+
+		scoped(hero, () => {
+			const lineEls = Array.from(hero.querySelectorAll<HTMLElement>('.hero__line-i'));
+			const fades = Array.from(
+				hero.querySelectorAll<HTMLElement>('[data-hero-fade]'),
+			).sort((a, b) => Number(a.dataset.delay ?? 0) - Number(b.dataset.delay ?? 0));
+			const veil = hero.querySelector<HTMLElement>('[data-hero-veil]');
+			const media = hero.querySelector<HTMLElement>('.avm');
+
+			if (reducedMotion()) {
+				gsap.set([lineEls, fades], { clearProps: 'all' });
+				gsap.set(veil, { autoAlpha: 0 });
+				return;
+			}
+
+			const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+			/* 1 · image settles from a slow zoom */
+			if (media) tl.fromTo(media, { scale: 1.14 }, { scale: 1, duration: 2.4, ease: 'power3.out' }, 0);
+			/* 2 · dark veil lifts */
+			if (veil) tl.to(veil, { autoAlpha: 0, duration: 1.7, ease: 'power2.inOut' }, 0.35);
+			/* 3 · headline rises line by line (fromTo so GSAP owns yPercent and
+			   doesn't treat the CSS translateY as pixels) */
+			tl.fromTo(lineEls, { y: 0, yPercent: 120 }, { y: 0, yPercent: 0, duration: 1.6, stagger: 0.11 }, 0.85);
+			/* 4 · supporting metadata glides up */
+			fades.forEach((el, i) => {
+				tl.to(
+					el,
+					{ autoAlpha: 1, y: 0, duration: 1.3 },
+					1.15 + i * 0.16,
+				);
+			});
+		});
+
+		const down = document.querySelector<HTMLButtonElement>('[data-scroll-down]');
+		down?.addEventListener('click', () => scrollTo('#work'));
+	}
+
+	onBoot(init);
+</script>

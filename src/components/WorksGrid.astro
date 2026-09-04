@@ -1,0 +1,317 @@
+---
+import ProjectCard from './ProjectCard.astro';
+import { projects, filterKeys, type Category } from '../data/projects';
+
+type FilterKey = 'all' | Category;
+
+const count = (key: FilterKey): number =>
+	key === 'all' ? projects.length : projects.filter((p) => p.tags.includes(key as Category)).length;
+---
+
+<div class="works" data-works>
+	<!-- filter bar -->
+	<nav class="works__filters" aria-label="Filter projects by category">
+		<div class="wrap works__filters-inner">
+			{
+				filterKeys.map(({ key, label }) => (
+					<button
+						class:list={['works__filter', { 'is-active': key === 'all' }]}
+						type="button"
+						data-filter
+						data-filter-key={key}
+						aria-pressed={key === 'all' ? 'true' : 'false'}
+					>
+						<span class="works__filter-label">{label}</span>
+						<span class="works__filter-count num" aria-hidden="true">
+							{String(count(key)).padStart(2, '0')}
+						</span>
+					</button>
+				))
+			}
+		</div>
+	</nav>
+
+	<!-- editorial grid -->
+	<ul class="works__grid">
+		{
+			projects.map((project, i) => (
+				<li class:list={['works__cell', 'wrap', `c${i % 4}`]} data-cell data-tags={project.tags.join(' ')}>
+					<ProjectCard project={project} shape={(i % 4) as 0 | 1 | 2 | 3} />
+				</li>
+			))
+		}
+	</ul>
+</div>
+
+<style>
+	/* ---------- filter bar ---------- */
+	.works__filters {
+		position: sticky;
+		top: 5.1rem;
+		z-index: 30;
+		background: color-mix(in srgb, var(--bg) 82%, transparent);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border-block: 1px solid var(--hairline-soft);
+	}
+	.works__filters-inner {
+		display: flex;
+		gap: clamp(0.2rem, 1.4vw, 1.2rem);
+		align-items: center;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		-webkit-overflow-scrolling: touch;
+	}
+	.works__filter {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.55rem;
+		padding: 1rem 0.35rem;
+		white-space: nowrap;
+		opacity: 0.55;
+		transition: opacity 0.45s ease;
+	}
+	.works__filter-label {
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+	}
+	.works__filter-count {
+		font-size: 0.58rem;
+		color: var(--mute);
+	}
+	.works__filter.is-active {
+		opacity: 1;
+	}
+	.works__filter.is-active .works__filter-label {
+		box-shadow: inset 0 -1px 0 currentColor;
+	}
+	@media (hover: hover) {
+		.works__filter:not(.is-active):hover {
+			opacity: 1;
+		}
+	}
+
+	/* ---------- grid ---------- */
+	.works__grid {
+		list-style: none;
+		margin: 0;
+		padding: clamp(4.5rem, 10vh, 8rem) 0 0;
+		display: flex;
+		flex-direction: column;
+		gap: clamp(5rem, 12vh, 10rem);
+	}
+
+	.works__cell {
+		min-width: 0;
+	}
+
+	/* asymmetric editorial rhythm */
+	@media (min-width: 1024px) {
+		.works__grid {
+			display: grid;
+			grid-template-columns: repeat(12, 1fr);
+			column-gap: clamp(2rem, 5vw, 5rem);
+			row-gap: clamp(6rem, 16vh, 12rem);
+			align-items: start;
+		}
+		.works__cell.c0 {
+			grid-column: 1 / span 7;
+		}
+		.works__cell.c1 {
+			grid-column: 9 / -1;
+			margin-top: clamp(4rem, 12vh, 9rem);
+		}
+		.works__cell.c2 {
+			grid-column: 2 / span 6;
+		}
+		.works__cell.c3 {
+			grid-column: 8 / span 5;
+			margin-top: clamp(2rem, 8vh, 6rem);
+		}
+	}
+
+	/* Cards are only masked once <html> carries .js (see global.css); the
+	   `.is-in` class is added the moment a reveal starts, so filtered-out
+	   cards (no .is-in) drop back to opacity 0. */
+	html.js .works__cell[data-cell] {
+		opacity: 0;
+	}
+	html.js .works__cell[data-cell].is-in {
+		opacity: 1;
+	}
+	html.js .works__cell[data-cell].is-hidden {
+		visibility: hidden;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		html.js .works__cell[data-cell] {
+			opacity: 1;
+			transform: none;
+		}
+		html.js .works__cell[data-cell].is-hidden {
+			visibility: hidden;
+		}
+	}
+</style>
+
+<script>
+	import gsap from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { onBoot, scoped, reducedMotion } from '../scripts/app';
+
+	const FILTERS = ['all', 'fashion', 'portrait', 'editorial', 'documentary', 'architecture'] as const;
+	const STAGE_TOP = 'top 90%';
+
+	function init(): void {
+		const root = document.querySelector<HTMLElement>('[data-works]');
+		if (!root) return;
+
+		const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+		const cells = Array.from(root.querySelectorAll<HTMLElement>('[data-cell]'));
+		if (buttons.length === 0) return;
+
+		const motion = !reducedMotion();
+		const shown = new Set<HTMLElement>(); /* cards with a live / finished entrance */
+
+		const isOnStage = (cell: HTMLElement): boolean => {
+			const r = cell.getBoundingClientRect();
+			return r.top < window.innerHeight * 0.92 && r.bottom > 0;
+		};
+
+		/** One-shot entrance for a card that is (about to be) visible.
+		 *  Adds `is-in` when it plays; below-fold cards are staged behind a
+		 *  scroll trigger instead of being forced visible. */
+		const enter = (cell: HTMLElement, order: number): void => {
+			cell.classList.remove('is-hidden');
+			if (!motion) {
+				cell.classList.add('is-in');
+				shown.add(cell);
+				return;
+			}
+
+			gsap.killTweensOf(cell);
+			cell.classList.remove('is-in');
+
+			const tween = gsap.fromTo(
+				cell,
+				{ opacity: 0, y: 56 },
+				{
+					opacity: 1,
+					y: 0,
+					duration: 1.2,
+					delay: order * 0.06,
+					ease: 'expo.out',
+					onStart: () => {
+						cell.classList.add('is-in');
+						shown.add(cell);
+					},
+					onComplete: () => gsap.set(cell, { clearProps: 'transform' }),
+				},
+			);
+
+			const onEnter = (): void => {
+				cell.classList.add('is-in');
+				shown.add(cell);
+				tween.play();
+			};
+			const trigger = ScrollTrigger.create({
+				trigger: cell,
+				start: STAGE_TOP,
+				once: true,
+				onEnter,
+			});
+			tween.pause();
+
+			/* already on screen (initial paint, or a filter swap that brought a
+			   below-fold card up) — play now instead of waiting for a scroll */
+			if (isOnStage(cell)) {
+				trigger.kill();
+				onEnter();
+			}
+		};
+
+		const applyFilter = (key: string, animated: boolean): void => {
+			/* exit — outgoing cards fade down out of the column */
+			if (animated && motion) {
+				cells.forEach((cell) => {
+					if (!shown.has(cell)) return;
+					const tags = (cell.dataset.tags ?? '').split(' ');
+					if (key === 'all' || tags.includes(key)) return;
+					gsap.to(cell, {
+						opacity: 0,
+						y: -26,
+						duration: 0.55,
+						ease: 'power2.in',
+						onComplete: () => {
+							shown.delete(cell);
+							cell.classList.add('is-hidden');
+							cell.classList.remove('is-in');
+							gsap.set(cell, { clearProps: 'transform' });
+						},
+					});
+				});
+			} else {
+				/* boot / reduced motion — just mark state */
+				cells.forEach((cell) => {
+					const tags = (cell.dataset.tags ?? '').split(' ');
+					const show = key === 'all' || tags.includes(key);
+					if (show) {
+						shown.add(cell);
+						cell.classList.remove('is-hidden');
+					} else {
+						shown.delete(cell);
+						cell.classList.add('is-hidden');
+					}
+				});
+			}
+
+			/* enter — the cards the new filter shows, in document order */
+			let n = 0;
+			cells.forEach((cell) => {
+				const tags = (cell.dataset.tags ?? '').split(' ');
+				const show = key === 'all' || tags.includes(key);
+				if (!show) return;
+				/* already visible + staying visible under an animated swap:
+				   leave them alone (fresh state was entered above); only cards
+				   that were hidden / newly revealed need an entrance */
+				if (!animated || !motion || !shown.has(cell)) {
+					shown.delete(cell);
+					enter(cell, n);
+					n += 1;
+				}
+			});
+
+			ScrollTrigger.refresh();
+		};			scoped(root, () => {
+				buttons.forEach((button) => {
+					button.addEventListener('click', () => {
+					const key = button.dataset.filterKey as (typeof FILTERS)[number];
+					if (!key || key === currentKey()) return;
+					const url = new URL(location.href);
+					url.searchParams.set('filter', key);
+					history.replaceState(null, '', url);
+					setActive(key);
+					applyFilter(key, true);
+				});
+			});
+
+			/* first paint — ?filter= support (horizontal gallery links land here) */
+			const wanted = new URLSearchParams(location.search).get('filter');
+			const initial = wanted && (FILTERS as readonly string[]).includes(wanted) ? wanted : 'all';
+			applyFilter(initial, false);
+		});
+	}
+
+	const currentKey = (): string => new URLSearchParams(location.search).get('filter') ?? 'all';
+
+	function setActive(key: string): void {
+		document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((b) => {
+			const on = b.dataset.filterKey === key;
+			b.classList.toggle('is-active', on);
+			b.setAttribute('aria-pressed', on ? 'true' : 'false');
+		});
+	}
+
+	onBoot(init);
+</script>

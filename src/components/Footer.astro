@@ -1,0 +1,185 @@
+---
+import { nav, site, socials } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="foot">
+	<div class="wrap">
+		<a class="foot__cta grp" href="/contact" data-fx="rise">
+			<span class="label">Next project</span>
+			<span class="foot__cta-main display display-md">
+				<span>Have a story</span>
+				<span>worth telling<span class="it">?</span></span>
+			</span>
+			<span class="foot__cta-arr" aria-hidden="true">
+				<svg width="52" height="24" viewBox="0 0 52 24" fill="none">
+					<path d="M0 12h50m0 0-9-9m9 9-9 9" stroke="currentColor" stroke-width="1" />
+				</svg>
+			</span>
+		</a>
+
+		<div class="foot__grid">
+			<div class="foot__brand">
+				<p class="foot__name display display-sm">Adrian <em>Vale</em></p>
+				<p class="foot__role label">{site.role}</p>
+			</div>
+
+			<nav class="foot__nav" aria-label="Footer">
+				{
+					nav.map((item) => (
+						<a class="foot__link u-line" href={item.href}>
+							{item.label}
+						</a>
+					))
+				}
+			</nav>
+
+			<div class="foot__col">
+				<p class="label">Social</p>
+				{
+					socials.map((s) => (
+						<a class="foot__link u-line" href={s.href} target={s.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+							{s.handle}
+						</a>
+					))
+				}
+			</div>
+
+			<div class="foot__col">
+				<p class="label">Studio</p>
+				<a class="foot__link u-line" href={`mailto:${site.email}`}>{site.email}</a>
+				<p class="foot__muted">{site.location}</p>
+				<p class="foot__muted">{site.coords}</p>
+			</div>
+		</div>
+
+		<div class="foot__bottom">
+			<span class="label">© {year} {site.name}</span>
+			<button class="foot__top label grp" type="button" data-back-top>
+				Back to top
+				<span class="arr" aria-hidden="true">↑</span>
+			</button>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.foot {
+		border-top: 1px solid var(--hairline);
+		padding-block: clamp(4.5rem, 9vh, 7rem) 1.6rem;
+		margin-top: clamp(4rem, 10vh, 8rem);
+	}
+
+	.foot__cta {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		align-items: end;
+		gap: 1.5rem;
+		padding-bottom: clamp(3rem, 7vh, 5rem);
+	}
+	.foot__cta-main {
+		display: flex;
+		flex-direction: column;
+	}
+	.foot__cta .label {
+		grid-column: 1 / -1;
+		margin-bottom: 1.2rem;
+	}
+	.foot__cta-main span {
+		display: block;
+	}
+	.foot__cta-main .it {
+		color: var(--mute);
+	}
+	.foot__cta-arr {
+		align-self: center;
+		color: var(--mute);
+		transition: transform 0.7s var(--ease-out-expo);
+	}
+	@media (hover: hover) {
+		.foot__cta:hover .foot__cta-arr {
+			transform: translateX(0.7rem);
+		}
+	}
+
+	.foot__grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 2.5rem 2rem;
+		padding-block: 2.2rem;
+		border-top: 1px solid var(--hairline);
+	}
+	.foot__brand-name,
+	.foot__name em {
+		font-style: normal;
+	}
+	.foot__name {
+		font-size: clamp(1.5rem, 3vw, 2.2rem);
+	}
+	.foot__name em {
+		font-style: italic;
+		font-weight: 300;
+	}
+	.foot__role {
+		margin-top: 0.7rem;
+	}
+	.foot__col,
+	.foot__nav {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.7rem;
+	}
+	.foot__col .label {
+		margin-bottom: 0.5rem;
+	}
+	.foot__link {
+		font-size: 0.85rem;
+		letter-spacing: 0.04em;
+		color: var(--fg);
+	}
+	.foot__muted {
+		margin: 0;
+		font-size: 0.8rem;
+		color: var(--mute);
+	}
+
+	.foot__bottom {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		align-items: center;
+		padding-top: 1.4rem;
+		border-top: 1px solid var(--hairline-soft);
+	}
+	.foot__top {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--fg);
+		transition: opacity 0.4s ease;
+	}
+	@media (hover: hover) {
+		.foot__top:hover {
+			opacity: 0.7;
+		}
+	}
+
+	@media (min-width: 860px) {
+		.foot__grid {
+			grid-template-columns: 1.6fr 0.8fr 0.8fr 1fr;
+		}
+	}
+</style>
+
+<script>
+	import { onBoot, scrollTo } from '../scripts/app';
+
+	function init(): void {
+		const btn = document.querySelector<HTMLButtonElement>('[data-back-top]');
+		if (!btn) return;
+		btn.addEventListener('click', () => scrollTo(0));
+	}
+
+	onBoot(init);
+</script>

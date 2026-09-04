@@ -1,0 +1,422 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0b0b0b;
+  --color-ink-2: #10100f;
+  --color-paper: #f2f0eb;
+  --color-mute: #8a8883;
+  --color-line: rgb(242 240 235 / 0.16);
+  --color-line-soft: rgb(242 240 235 / 0.09);
+
+  --font-display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
+  --font-ui: "Manrope Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-power3: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------- base */
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --bg: #0b0b0b;
+    --fg: #f2f0eb;
+    --mute: #8a8883;
+    --hairline: rgb(242 240 235 / 0.16);
+    --hairline-soft: rgb(242 240 235 / 0.09);
+    --pad-x: clamp(1.25rem, 4.5vw, 4.5rem);
+  }
+
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(242 240 235 / 0.28) transparent;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    min-height: 100vh;
+  }
+
+  html.is-locked {
+    overflow: hidden;
+  }
+
+  ::selection {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--fg);
+    outline-offset: 4px;
+  }
+
+  /* hide native cursor while the custom cursor drives */
+  @media (hover: hover) and (pointer: fine) {
+    html.js.has-cursor,
+    html.js.has-cursor a,
+    html.js.has-cursor button,
+    html.js.has-cursor [role="button"],
+    html.js.has-cursor input,
+    html.js.has-cursor textarea,
+    html.js.has-cursor select,
+    html.js.has-cursor label {
+      cursor: none;
+    }
+  }
+}
+
+/* -------------------------------------------------------------------- */
+/* Motion-state machinery.
+   Content is only hidden once <html> carries .js (set by an inline head
+   script) so everything degrades gracefully without JavaScript.          */
+/* -------------------------------------------------------------------- */
+
+html.js [data-fx="fade"],
+html.js [data-fx="rise"] {
+  opacity: 0;
+}
+html.js [data-fx="rise"] {
+  transform: translateY(1.4rem);
+}
+html.js [data-fx="clip"] {
+  clip-path: inset(0 0 100% 0);
+}
+html.js [data-fx="clip"] .fx-img {
+  transform: scale(1.12);
+}
+html.js [data-fx-lines] {
+  opacity: 0;
+}
+html.js [data-fx-lines] .l-line {
+  overflow: clip;
+}
+html.js [data-fx-lines] .l-line > .l-i {
+  transform: translateY(120%);
+}
+
+/* Line-reveal structure. Every masked line must be its own block — inline
+   spans would flow together onto one line (and overflow narrow screens) and
+   transforms don't apply to inline boxes. These rules are intentionally NOT
+   gated on html.js so layouts degrade correctly without scripting. */
+.l-line {
+  display: block;
+}
+.l-line > .l-i {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-fx],
+  html.js [data-fx-lines] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+  html.js [data-fx] .fx-img,
+  html.js [data-fx-lines] .l-i {
+    transform: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------ typography */
+
+@layer components {
+  .label {
+    font-size: 0.625rem; /* 10px */
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--mute);
+    line-height: 1.4;
+  }
+
+  .label--fg {
+    color: var(--fg);
+  }
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.008em;
+    line-height: 0.94;
+    text-wrap: balance;
+  }
+
+  .display-xl {
+    font-size: clamp(3.1rem, 9.2vw, 10.75rem);
+  }
+  .display-lg {
+    font-size: clamp(2.5rem, 6.4vw, 7.5rem);
+  }
+  .display-md {
+    font-size: clamp(1.9rem, 4.2vw, 5rem);
+  }
+  .display-sm {
+    font-size: clamp(1.4rem, 2.5vw, 2.6rem);
+  }
+
+  .it {
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.06em;
+  }
+
+  .prose-p {
+    color: var(--mute);
+    font-size: 0.95rem;
+    line-height: 1.85;
+    max-width: 34rem;
+    letter-spacing: 0.002em;
+  }
+}
+
+/* ------------------------------------------------------------- structure */
+
+@layer components {
+  .wrap {
+    padding-inline: var(--pad-x);
+  }
+  .sec {
+    padding-block: clamp(6rem, 12vh, 9.5rem);
+  }
+  .hairline {
+    border-color: var(--hairline);
+  }
+  .hairline-soft {
+    border-color: var(--hairline-soft);
+  }
+
+  /* animated underline for text links */
+  .u-line {
+    position: relative;
+  }
+  .u-line::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -0.18em;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.7s var(--ease-out-expo);
+  }
+  @media (hover: hover) {
+    .u-line:hover::after {
+      transform: scaleX(1);
+      transform-origin: left center;
+    }
+  }
+  .u-line--on::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  /* diagonal arrow micro-interaction */
+  .arr {
+    display: inline-block;
+    transition: transform 0.65s var(--ease-out-expo);
+  }
+  .grp:hover .arr,
+  a:hover > .arr,
+  button:hover .arr {
+    transform: translate(0.18em, -0.18em);
+  }
+
+  /* reusable editorial section heading */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-top: 1.8rem;
+    border-top: 1px solid var(--hairline);
+    margin-bottom: clamp(3.4rem, 8vh, 6rem);
+  }
+  .section-head .label {
+    color: var(--fg);
+    font-size: 0.74rem;
+    letter-spacing: 0.32em;
+  }
+  .section-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--mute);
+    transition: color 0.4s ease;
+  }
+  @media (hover: hover) {
+    .section-more:hover {
+      color: var(--fg);
+    }
+  }
+}
+
+/* --------------------------------------------------------------- media */
+
+@layer components {
+  .avm {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: #14130f;
+  }
+  .avm img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* readable shade under text on top of imagery */
+  .avm[data-shade="soft"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(11 11 11 / 0.62), transparent 55%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .avm[data-shade="full"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgb(11 11 11 / 0.34);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* gentle hover growth — JS-free */
+  .avm--grow img {
+    transition:
+      transform 1.15s var(--ease-out-expo),
+      filter 0.8s ease;
+  }
+  @media (hover: hover) {
+    .grp:hover .avm--grow img {
+      transform: scale(1.055);
+      filter: brightness(0.92);
+    }
+  }
+}
+
+/* ---------------------------------------------------------- decorations */
+
+@layer components {
+  /* film grain overlay */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("/grain.svg");
+    background-size: 190px 190px;
+    mix-blend-mode: screen;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .num-progress {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ------------------------------------------------- view transitions ---- */
+
+::view-transition-old(root) {
+  animation: vt-out 0.42s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+::view-transition-new(root) {
+  animation: vt-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: scale(0.988);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: scale(1.012);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+/* Astro view-transition fallback markers */
+html[data-astro-transition="back"]::view-transition-old(root) {
+  animation-name: vt-in-back;
+}
+html[data-astro-transition="back"]::view-transition-new(root) {
+  animation-name: vt-out-back;
+}
+@keyframes vt-in-back {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes vt-out-back {
+  to {
+    opacity: 0;
+    transform: scale(1.012);
+  }
+}
+
+/* ------------------------------------------------------------ helpers --- */

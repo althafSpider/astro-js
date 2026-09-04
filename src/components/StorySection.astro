@@ -1,0 +1,225 @@
+---
+import ImageReveal from './ImageReveal.astro';
+import { stories } from '../data/projects';
+---
+
+<section class="stories" data-stories aria-label="Selected stories">
+	<div class="wrap stories__head" data-fx-lines>
+		<p class="label">
+			<span class="l-line"><span class="l-i">Selected stories</span></span>
+		</p>
+		<p class="label stories__head-meta">
+			<span class="l-line"><span class="l-i">Essays & field notes</span></span>
+		</p>
+	</div>
+
+	<div class="stories__list" data-story-list>
+		<span class="stories__spine" aria-hidden="true"><span data-story-line></span></span>
+
+		{
+			stories.map((story) => (
+				<article class="story">
+					<div class="story__num">
+						<span class="story__no display display-sm num" data-fx="rise">{story.no}</span>
+						<span class="story__year label num" data-fx="fade">{story.project.year}</span>
+					</div>
+
+					<div class="story__media">
+						<a class="grp block" href={`/work/${story.project.slug}`} data-cursor="view" data-cursor-title={story.project.title} aria-label={story.project.title}>
+							<ImageReveal
+								photo={story.project.cover}
+								frameClass="w-full aspect-[4/3] lg:aspect-[16/11]"
+								width={1800}
+								height={1300}
+								sizes="(min-width:1024px) 40vw, 90vw"
+								reveal
+								grow
+							/>
+						</a>
+					</div>
+
+					<div class="story__body">
+						<h3 class="story__title display display-sm" data-fx-lines>
+							<span class="l-line"><span class="l-i">{story.project.title}</span></span>
+						</h3>
+						<p class="label story__cat" data-fx="fade">{story.project.category}</p>
+						<p class="story__excerpt" data-fx="fade">{story.excerpt}</p>
+						<a class="story__more label label--fg" href={`/work/${story.project.slug}`} data-fx="fade">
+							Read the story <span class="arr" aria-hidden="true">→</span>
+						</a>
+					</div>
+
+					<div class="story__note label" data-fx="fade">{story.line}</div>
+				</article>
+			))
+		}
+	</div>
+</section>
+
+<style>
+	.stories__head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-bottom: clamp(3rem, 7vh, 5rem);
+	}
+	.stories__head .label {
+		color: var(--fg);
+		font-size: 0.72rem;
+		letter-spacing: 0.3em;
+	}
+	.stories__head-meta {
+		color: var(--mute) !important;
+	}
+
+	.stories__list {
+		position: relative;
+		border-top: 1px solid var(--hairline);
+	}
+
+	/* vertical spine through the numbers */
+	.stories__spine {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: calc(var(--pad-x) + 0.9rem);
+		width: 1px;
+		background: var(--hairline-soft);
+		pointer-events: none;
+	}
+	.stories__spine span {
+		display: block;
+		width: 100%;
+		height: 100%;
+		background: var(--fg);
+		transform: scaleY(0);
+		transform-origin: top;
+	}
+
+	.story {
+		position: relative;
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2.4rem 0;
+		padding-block: clamp(2.6rem, 6vh, 4.5rem);
+		border-bottom: 1px solid var(--hairline);
+	}
+
+	.story__num {
+		position: absolute;
+		left: 0;
+		top: clamp(2.6rem, 6vh, 4.5rem);
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		background: var(--bg);
+		padding-inline: var(--pad-x);
+		padding-right: 1.6rem;
+		padding-bottom: 0.6rem;
+	}
+	.story__no {
+		font-size: clamp(1.6rem, 3vw, 2.6rem);
+		font-variant-numeric: tabular-nums;
+	}
+	.story__year {
+		color: var(--mute);
+	}
+
+	.story__media {
+		margin-left: 0;
+	}
+	.story__media a {
+		display: block;
+	}
+	.story__body {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		align-items: flex-start;
+		margin-left: 0;
+	}
+	.story__title {
+		margin: 0;
+	}
+	.story__excerpt {
+		color: var(--mute);
+		font-size: 0.95rem;
+		line-height: 1.75;
+		max-width: 30rem;
+		margin: 0;
+	}
+	.story__more {
+		color: var(--fg);
+	}
+	.story__note {
+		display: none;
+		color: var(--mute);
+		align-self: end;
+		max-width: 12rem;
+		text-transform: none;
+		font-weight: 500;
+		letter-spacing: 0.02em;
+		font-size: 0.8rem;
+		line-height: 1.7;
+	}
+
+	@media (min-width: 1024px) {
+		.story {
+			grid-template-columns: repeat(12, 1fr);
+			column-gap: clamp(2rem, 4vw, 4rem);
+			align-items: center;
+		}
+		.story__num {
+			position: static;
+			grid-column: span 2;
+			background: none;
+			padding: 0;
+			grid-row: 1;
+		}
+		.story__media {
+			grid-column: span 5;
+		}
+		.story__body {
+			grid-column: span 4;
+			margin-left: clamp(0rem, 2vw, 2rem);
+		}
+		.story__note {
+			display: block;
+			grid-column: span 1;
+		}
+		.stories__spine {
+			left: calc(var(--pad-x) + 2.4rem);
+		}
+	}
+</style>
+
+<script>
+	import gsap from 'gsap';
+	import { onBoot, scoped, reducedMotion } from '../scripts/app';
+
+	function init(): void {
+		const root = document.querySelector<HTMLElement>('[data-stories]');
+		if (!root || reducedMotion()) return;
+		const line = root.querySelector<HTMLElement>('[data-story-line]');
+		if (!line) return;			scoped(root, () => {
+				/* the spine draws itself down the whole list */
+				gsap.fromTo(
+					line,
+					{ scaleY: 0 },
+					{
+						scaleY: 1,
+						ease: 'none',
+						scrollTrigger: {
+							trigger: root.querySelector('[data-story-list]'),
+							start: 'top 78%',
+							end: 'bottom 55%',
+							scrub: 1,
+						},
+					},
+				);
+			});
+	}
+
+	onBoot(init);
+</script>

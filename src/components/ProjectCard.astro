@@ -1,0 +1,105 @@
+---
+import ImageReveal from './ImageReveal.astro';
+import type { Project } from '../data/projects';
+
+interface Props {
+	project: Project;
+	/** which gallery shape (drives column span / aspect) */
+	shape: 0 | 1 | 2 | 3;
+}
+
+const { project, shape } = Astro.props;
+
+const slots = [
+	{ span: 'lg:col-span-7', aspect: 'aspect-[4/5]', w: 1400, h: 1750 },
+	{ span: 'lg:col-span-5', aspect: 'aspect-[4/3]', w: 1500, h: 1100 },
+	{ span: 'lg:col-span-7', aspect: 'aspect-[16/10]', w: 1800, h: 1150 },
+	{ span: 'lg:col-span-5', aspect: 'aspect-[3/4]', w: 1150, h: 1550 },
+];
+const s = slots[shape];
+const href = `/work/${project.slug}`;
+---
+
+<article class="card" data-work-item>
+	<div class="card__frame-wrap">
+		<a class="grp card__link" href={href} data-cursor="view" data-cursor-title={project.title} aria-label={`${project.title} — view project`}>
+			<ImageReveal
+				photo={project.cover}
+				frameClass={['w-full aspect-[4/3]', s.aspect].join(' ')}
+				width={s.w}
+				height={s.h}
+				sizes="(min-width:1024px) 55vw, 92vw"
+				grow
+			/>
+			<span class="card__chip" aria-hidden="true">
+				<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+					<path d="M3 13 13 3m0 0H5m8 0v8" stroke="currentColor" stroke-width="1.2" />
+				</svg>
+			</span>
+		</a>
+	</div>
+
+	<div class="card__meta">
+		<span class="label num">{project.index} — {project.category}</span>
+		<span class="label num">{project.year}</span>
+	</div>
+	<h3 class="card__title">
+		<a class="u-line" href={href}>{project.title}</a>
+	</h3>
+</article>
+
+<style>
+	.card {
+		display: flex;
+		flex-direction: column;
+		gap: 1.1rem;
+		min-width: 0;
+	}
+	.card__link {
+		position: relative;
+		display: block;
+	}
+	.card__chip {
+		position: absolute;
+		right: 1rem;
+		bottom: 1rem;
+		z-index: 3;
+		display: grid;
+		place-items: center;
+		width: 2.7rem;
+		height: 2.7rem;
+		border-radius: 999px;
+		border: 1px solid rgb(242 240 235 / 0.5);
+		background: rgb(11 11 11 / 0.35);
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
+		color: var(--fg);
+		opacity: 0;
+		transform: translateY(0.5rem) scale(0.8);
+		transition:
+			opacity 0.5s ease,
+			transform 0.6s var(--ease-out-expo);
+	}
+	@media (hover: hover) {
+		.card:hover .card__chip {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+	.card__meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+	.card__meta .label {
+		color: var(--mute);
+	}
+	.card__title {
+		margin: 0;
+		font-family: var(--font-display);
+		font-weight: 400;
+		font-size: clamp(1.5rem, 2.6vw, 2.3rem);
+		line-height: 1.1;
+	}
+</style>

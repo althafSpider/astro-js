@@ -1,0 +1,81 @@
+---
+interface Props {
+	kicker: string;
+	title: string[];
+	meta?: string[];
+}
+
+const { kicker, title, meta } = Astro.props;
+---
+
+<header class="pintro wrap">
+	<div class="pintro__row">
+		<p class="label" data-fx-lines>
+			<span class="l-line"><span class="l-i">{kicker}</span></span>
+		</p>
+		<p class="label pintro__right" data-fx="fade">
+			{
+				meta?.map((m, i) => (
+					<span class="pintro__meta-item">
+						{i > 0 && <span class="pintro__sep" aria-hidden="true"></span>}
+						{m}
+					</span>
+				))
+			}
+		</p>
+	</div>
+
+	<h1 class="pintro__title display display-xl" data-fx-lines>
+		{
+			title.map((line) => (
+				<span class="l-line"><span class="l-i">{line}</span></span>
+			))
+		}
+	</h1>
+</header>
+
+<style>
+	.pintro {
+		padding-top: clamp(7.5rem, 15vh, 11rem);
+		padding-bottom: clamp(3rem, 8vh, 6rem);
+		border-bottom: 1px solid var(--hairline);
+	}
+
+	.pintro__row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1.5rem;
+		padding-bottom: clamp(2.5rem, 6vh, 4.5rem);
+	}
+	.pintro__row .label {
+		color: var(--fg);
+	}
+	.pintro__right {
+		display: inline-flex;
+		align-items: center;
+		gap: 1.1rem;
+		text-align: right;
+		color: var(--mute);
+		justify-content: flex-end;
+		flex-wrap: wrap;
+	}
+	.pintro__meta-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 1.1rem;
+	}
+	.pintro__sep {
+		width: 4px;
+		height: 4px;
+		border-radius: 99px;
+		background: var(--mute);
+		display: inline-block;
+	}
+
+	.pintro__title {
+		margin: 0;
+		max-width: 16ch;
+		letter-spacing: -0.015em;
+	}
+</style>

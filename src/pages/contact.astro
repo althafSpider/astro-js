@@ -1,0 +1,368 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { site, socials } from '../data/site';
+
+const projects = ['Editorial', 'Fashion', 'Portrait', 'Commercial', 'Architecture', 'Other'];
+const lines = ['Let’s', 'create', 'something', 'meaningful.'];
+---
+
+<Layout title="Contact" description="Let’s create something meaningful — commissions, collaborations and editorial work with Adrian Vale.">
+	<!-- -------------------------------------------------------- hero -->
+	<section class="chero wrap">
+		<div class="chero__row">
+			<p class="label" data-fx-lines>
+				<span class="l-line"><span class="l-i">Contact — New work</span></span>
+			</p>
+			<p class="label chero__status" data-fx="fade">{site.availability}</p>
+		</div>
+
+		<h1 class="chero__title display display-xl" data-fx-lines>
+			{
+				lines.map((line) => (
+					<span class="l-line"><span class="l-i">{line}</span></span>
+				))
+			}
+		</h1>
+	</section>
+
+	<!-- --------------------------------------------------- big mail -->
+	<section class="cmail wrap">
+		<a class="cmail__link grp" href={`mailto:${site.email}`} data-cursor="open">
+			<span class="cmail__arr" aria-hidden="true">
+				<svg width="64" height="30" viewBox="0 0 64 30" fill="none">
+					<path d="M0 15h62m0 0-11-11m11 11-11 11" stroke="currentColor" stroke-width="1.2" />
+				</svg>
+			</span>
+			<span class="cmail__text">{site.email}</span>
+		</a>
+	</section>
+
+	<!-- -------------------------------------------- info + form grid -->
+	<section class="ccols wrap">
+		<div class="ccols__info">
+			<p class="ccols__lede prose-p" data-fx="fade">
+				Whether it is an editorial commission, a portrait sitting or a series
+				you have been carrying for years — tell me about it. I read everything
+				myself and reply within two working days.
+			</p>
+
+			<div class="ccols__blocks">
+				<div class="ccols__block" data-fx="rise">
+					<p class="label">Studio</p>
+					<p class="ccols__val">{site.location}</p>
+					<p class="ccols__sub label">{site.coords}</p>
+				</div>
+
+				<div class="ccols__block" data-fx="rise">
+					<p class="label">Elsewhere</p>
+					{
+						socials.map((s) => (
+							<a class="ccols__link u-line" href={s.href} target={s.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+								{s.handle}
+							</a>
+						))
+					}
+				</div>
+
+				<div class="ccols__block" data-fx="rise">
+					<p class="label">Studio hours</p>
+					<p class="ccols__val">Mon — Fri</p>
+					<p class="ccols__sub label">10:00 — 19:00 CET</p>
+				</div>
+			</div>
+		</div>
+
+		<form class="cform" data-form novalidate>
+			<div class="cform__grid">
+				<label class="cform__field">
+					<span class="label">Name</span>
+					<input type="text" name="name" autocomplete="name" required placeholder="Jane Doe" />
+				</label>
+
+				<label class="cform__field">
+					<span class="label">Email</span>
+					<input type="email" name="email" autocomplete="email" required placeholder="jane@studio.com" />
+				</label>
+			</div>
+
+			<label class="cform__field">
+				<span class="label">Project</span>
+				<select name="project" required>
+					<option value="" selected>Select a discipline</option>
+					{
+						projects.map((p) => <option value={p}>{p}</option>)
+					}
+				</select>
+			</label>
+
+			<label class="cform__field">
+				<span class="label">Message</span>
+				<textarea name="message" rows={5} required placeholder="Tell me about the project — dates, mood, budget, anything."></textarea>
+			</label>
+
+			<div class="cform__foot">
+				<p class="cform__status label" data-form-status aria-live="polite"></p>
+				<button class="cform__send grp" type="submit">
+					<span class="label label--fg">Send inquiry</span>
+					<span class="arr" aria-hidden="true">→</span>
+				</button>
+			</div>
+		</form>
+	</section>
+</Layout>
+
+<style>
+	/* --------------------------------------------------------- hero */
+	.chero {
+		padding-top: clamp(7.5rem, 15vh, 11.5rem);
+		padding-bottom: clamp(3rem, 7vh, 5rem);
+		border-bottom: 1px solid var(--hairline);
+	}
+	.chero__row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1.5rem;
+		padding-bottom: clamp(2.5rem, 6vh, 4.5rem);
+	}
+	.chero__row .label {
+		color: var(--fg);
+	}
+	.chero__status {
+		color: var(--mute);
+		text-align: right;
+	}
+	.chero__title {
+		margin: 0;
+		max-width: 11ch;
+		letter-spacing: -0.02em;
+	}
+	.chero__title .it {
+		font-style: italic;
+	}
+	@media (max-width: 640px) {
+		.chero__status {
+			display: none;
+		}
+	}
+
+	/* ------------------------------------------------------ big mail */
+	.cmail {
+		padding-top: clamp(2.5rem, 6vh, 4.5rem);
+		padding-bottom: clamp(2rem, 5vh, 3.5rem);
+	}
+	.cmail__link {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 1.2rem;
+	}
+	.cmail__text {
+		position: relative;
+		font-family: var(--font-display);
+		font-weight: 300;
+		font-style: italic;
+		font-size: clamp(1.9rem, 6.4vw, 6rem);
+		line-height: 1.06;
+		letter-spacing: -0.01em;
+		overflow-wrap: anywhere;
+	}
+	.cmail__text::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: -0.12em;
+		width: 100%;
+		height: 1px;
+		background: currentColor;
+		transform: scaleX(0.32);
+		transform-origin: left center;
+		transition: transform 0.8s var(--ease-out-expo);
+	}
+	.cmail__arr {
+		color: var(--mute);
+		transition: transform 0.7s var(--ease-out-expo);
+	}
+	@media (hover: hover) {
+		.cmail__link:hover .cmail__text::after {
+			transform: scaleX(1);
+		}
+		.cmail__link:hover .cmail__arr {
+			transform: translate(0.8rem, -0.8rem);
+			color: var(--fg);
+		}
+	}
+
+	/* ------------------------------------------------ info + form */
+	.ccols {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 4rem 0;
+		padding-top: clamp(3rem, 7vh, 5rem);
+		border-top: 1px solid var(--hairline);
+	}
+
+	.ccols__lede {
+		margin: 0 0 2.6rem;
+	}
+	.ccols__blocks {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+		gap: 2.4rem 2rem;
+		border-top: 1px solid var(--hairline);
+		padding-top: 2rem;
+	}
+	.ccols__block {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.55rem;
+	}
+	.ccols__block .label {
+		color: var(--mute);
+		margin-bottom: 0.3rem;
+	}
+	.ccols__val {
+		margin: 0;
+		font-family: var(--font-display);
+		font-style: italic;
+		font-size: clamp(1.2rem, 2vw, 1.7rem);
+	}
+	.ccols__sub {
+		color: var(--mute);
+	}
+	.ccols__link {
+		font-size: 0.95rem;
+		color: var(--fg);
+	}
+
+	/* form */
+	.cform {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+	.cform__grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2rem;
+	}
+	.cform__field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.7rem;
+	}
+	.cform__field .label {
+		color: var(--mute);
+	}
+	.cform__field input,
+	.cform__field textarea,
+	.cform__field select {
+		width: 100%;
+		background: transparent;
+		border: 0;
+		border-bottom: 1px solid var(--hairline);
+		border-radius: 0;
+		padding: 0.7rem 0;
+		color: var(--fg);
+		font-family: var(--font-display);
+		font-size: clamp(1.2rem, 2vw, 1.6rem);
+		font-style: italic;
+		transition: border-color 0.5s ease;
+	}
+	.cform__field select {
+		cursor: pointer;
+	}
+	.cform__field select option {
+		background: var(--bg);
+		color: var(--fg);
+		font-family: var(--font-ui);
+		font-style: normal;
+	}
+	.cform__field textarea {
+		resize: vertical;
+		min-height: 6.5rem;
+		line-height: 1.6;
+	}
+	.cform__field input::placeholder,
+	.cform__field textarea::placeholder {
+		color: rgb(242 240 235 / 0.3);
+	}
+	.cform__field input:focus,
+	.cform__field textarea:focus,
+	.cform__field select:focus {
+		outline: none;
+		border-bottom-color: var(--fg);
+	}
+	.cform__foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+		padding-top: 0.6rem;
+	}
+	.cform__status {
+		color: var(--mute);
+	}
+	.cform__send {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.9rem;
+		padding: 0.95rem 1.7rem;
+		border: 1px solid var(--hairline);
+		border-radius: 999px;
+		transition: border-color 0.5s ease, background 0.5s ease;
+	}
+	.cform__send .label {
+		color: var(--fg);
+	}
+	.cform__send .arr {
+		font-size: 1.1em;
+	}
+	@media (hover: hover) {
+		.cform__send:hover {
+			border-color: var(--fg);
+			background: rgb(242 240 235 / 0.06);
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.ccols {
+			grid-template-columns: 0.85fr 1.15fr;
+			column-gap: clamp(4rem, 9vw, 11rem);
+		}
+		.cform__grid {
+			grid-template-columns: 1fr 1fr;
+			column-gap: 2.4rem;
+		}
+	}
+</style>
+
+<script>
+	import { onBoot } from '../scripts/app';
+import { site } from '../data/site';
+
+	function initForm(): void {
+		const form = document.querySelector<HTMLFormElement>('[data-form]');
+		const status = document.querySelector<HTMLElement>('[data-form-status]');
+		if (!form || !status) return;
+
+		form.addEventListener('submit', (e) => {
+			e.preventDefault();
+			if (!form.checkValidity()) {
+				status.textContent = 'Please complete the fields above.';
+				return;
+			}
+			const data = new FormData(form);
+			const subject = encodeURIComponent(`New inquiry — ${String(data.get('name') ?? '')}`);
+			const body = encodeURIComponent(
+				`Name: ${String(data.get('name') ?? '')}\nEmail: ${String(data.get('email') ?? '')}\nProject: ${String(data.get('project') ?? '')}\n\n${String(data.get('message') ?? '')}`,
+			);
+			window.location.href = `mailto:${site.email}?subject=${subject}&body=${body}`;
+			status.textContent = 'Opening your mail app — thank you.';
+			form.reset();
+		});
+	}
+
+	onBoot(initForm);
+</script>

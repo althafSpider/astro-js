@@ -1,0 +1,328 @@
+---
+import MenuOverlay from './MenuOverlay.astro';
+import { nav } from '../data/site';
+
+const path = Astro.url.pathname;
+const isActive = (href: string): boolean => (href === '/' ? path === '/' : path.startsWith(href));
+const year = new Date().getFullYear();
+---
+
+<header class="nav" data-nav>
+	<div class="wrap nav__row">
+		<a class="nav__brand" href="/">
+			<span class="nav__brand-name">Adrian <em>Vale</em></span>
+		</a>
+
+		<nav class="nav__links" aria-label="Primary">
+			{
+				nav.map((item) => (
+					<a
+						class:list={['nav__link', { 'is-active': isActive(item.href) }]}
+						href={item.href}
+						aria-current={isActive(item.href) ? 'page' : undefined}
+					>
+						{item.label}
+					</a>
+				))
+			}
+		</nav>
+
+		<button
+			class="nav__toggle"
+			type="button"
+			data-menu-toggle
+			aria-expanded="false"
+			aria-controls="menu"
+		>
+			<span class="nav__toggle-label label" data-menu-label>Menu</span>
+			<span class="nav__toggle-icon" aria-hidden="true"><i></i><i></i></span>
+		</button>
+	</div>
+</header>
+
+<MenuOverlay year={year} />
+
+<style>
+	.nav {
+		position: fixed;
+		inset: 0 0 auto 0;
+		z-index: 60;
+		padding-block: 0.9rem;
+		transition:
+			background-color 0.6s ease,
+			backdrop-filter 0.6s ease,
+			border-color 0.6s ease;
+		border-bottom: 1px solid transparent;
+	}
+	.nav.is-scrolled {
+		background: color-mix(in srgb, var(--bg) 58%, transparent);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		border-bottom-color: var(--hairline-soft);
+	}
+	html.menu-open .nav {
+		background: transparent;
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
+		border-bottom-color: transparent;
+	}
+
+	.nav__row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 2rem;
+		height: 3.4rem;
+	}
+
+	.nav__brand {
+		display: inline-flex;
+		position: relative;
+		z-index: 2;
+	}
+	.nav__brand::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: -0.35rem;
+		width: 100%;
+		height: 1px;
+		background: currentColor;
+		transform: scaleX(0);
+		transform-origin: right;
+		transition: transform 0.7s var(--ease-out-expo);
+	}
+	@media (hover: hover) {
+		.nav__brand:hover::after {
+			transform: scaleX(1);
+			transform-origin: left;
+		}
+	}
+	.nav__brand-name {
+		font-family: var(--font-display);
+		font-weight: 500;
+		font-size: 1.5rem;
+		letter-spacing: 0.01em;
+		line-height: 1;
+		color: var(--fg);
+	}
+	.nav__brand-name em {
+		font-weight: 300;
+		font-style: italic;
+	}
+
+	.nav__links {
+		display: none;
+		align-items: center;
+		gap: clamp(1.6rem, 3vw, 3rem);
+		margin-inline: auto;
+		transition: opacity 0.4s ease;
+	}
+	.nav__link {
+		position: relative;
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.26em;
+		text-transform: uppercase;
+		color: var(--fg);
+		opacity: 0.82;
+		padding-block: 0.4rem;
+		transition: opacity 0.4s ease;
+	}
+	.nav__link::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		height: 1px;
+		background: currentColor;
+		transform: scaleX(0);
+		transform-origin: right center;
+		transition: transform 0.6s var(--ease-out-expo);
+	}
+	@media (hover: hover) {
+		.nav__link:hover,
+		.nav__link.is-active {
+			opacity: 1;
+		}
+		.nav__link:hover::after,
+		.nav__link.is-active::after {
+			transform: scaleX(1);
+			transform-origin: left center;
+		}
+	}
+
+	.nav__toggle {
+		position: relative;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.9rem;
+		padding: 0.55rem 1.05rem;
+		border: 1px solid var(--hairline);
+		border-radius: 999px;
+		transition:
+			border-color 0.5s ease,
+			background 0.5s ease;
+	}
+	@media (hover: hover) {
+		.nav__toggle:hover {
+			border-color: var(--fg);
+			background: rgb(242 240 235 / 0.06);
+		}
+	}
+	.nav__toggle-label {
+		color: var(--fg);
+		letter-spacing: 0.28em;
+		min-width: 2.9rem;
+		text-align: left;
+	}
+	.nav__toggle-icon {
+		display: inline-grid;
+		gap: 5px;
+		width: 1rem;
+	}
+	.nav__toggle-icon i {
+		display: block;
+		height: 1px;
+		width: 100%;
+		background: var(--fg);
+		transition: transform 0.45s var(--ease-out-expo);
+	}
+	html.menu-open .nav__toggle-icon i:nth-child(1) {
+		transform: translateY(3px) rotate(45deg);
+	}
+	html.menu-open .nav__toggle-icon i:nth-child(2) {
+		transform: translateY(-3px) rotate(-45deg);
+	}
+
+	@media (min-width: 1024px) {
+		.nav__links {
+			display: flex;
+		}
+		html.menu-open .nav__links {
+			opacity: 0;
+		}
+	}
+</style>
+
+<script>
+	import gsap from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { onBoot, scoped, reducedMotion, lockScroll } from '../scripts/app';
+	import { navigate } from 'astro:transitions/client';
+
+	function init(): void {
+		const header = document.querySelector<HTMLElement>('[data-nav]');
+		const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+		const overlay = document.querySelector<HTMLElement>('[data-menu]');
+		if (!header || !toggle || !overlay) return;
+
+		scoped(overlay, () => {
+			/* entrance — header glides down once content is ready */
+			if (!reducedMotion()) {
+				gsap.fromTo(
+					header,
+					{ autoAlpha: 0, y: -18 },
+					{ autoAlpha: 1, y: 0, duration: 1.1, delay: 0.2, ease: 'expo.out' },
+				);
+			}
+
+			/* scrolled state for the translucent backdrop */
+			ScrollTrigger.create({
+				start: 40,
+				end: 'max',
+				onToggle: (self) => header.classList.toggle('is-scrolled', self.isActive),
+			});
+
+			let open = false;
+			let busy = false;
+			let pendingClose = false;
+			const label = document.querySelector<HTMLElement>('[data-menu-label]');
+			const links = Array.from(overlay.querySelectorAll<HTMLElement>('[data-menu-link]'));
+			const items = Array.from(overlay.querySelectorAll<HTMLElement>('[data-menu-item] .mi'));
+			const meta = overlay.querySelector<HTMLElement>('[data-menu-meta]');
+
+			const setState = (isOpen: boolean): void => {
+				open = isOpen;
+				document.documentElement.classList.toggle('menu-open', isOpen);
+				lockScroll(isOpen);
+				toggle.setAttribute('aria-expanded', String(isOpen));
+				overlay.toggleAttribute('inert', !isOpen);
+				if (label) label.textContent = isOpen ? 'Close' : 'Menu';
+			};
+
+			const openMenu = (): void => {
+				if (open || busy) return;
+				busy = true;
+				setState(true);
+				if (reducedMotion()) {
+					busy = false;
+					return;
+				}
+				const tl = gsap.timeline({
+					onComplete: () => {
+						busy = false;
+						/* Escape pressed while the open animation was running */
+						if (pendingClose) {
+							pendingClose = false;
+							closeMenu();
+						}
+					},
+				});
+				tl.set(overlay, { clipPath: 'inset(0% 0% 100% 0%)', visibility: 'visible' })
+					.set(items, { y: 0, yPercent: 120, autoAlpha: 1 }, 0)
+					.to(overlay, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.95, ease: 'power3.inOut' }, 0.05)
+					.to(items, { yPercent: 0, duration: 1.1, stagger: 0.09, ease: 'expo.out' }, 0.12)
+					.fromTo(meta, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 0.55);
+			};
+
+			const closeMenu = (done?: () => void): void => {
+				if (!open || busy) return;
+				busy = true;
+				const finish = (): void => {
+					busy = false;
+					setState(false);
+					done?.();
+				};
+				if (reducedMotion()) {
+					setState(false);
+					busy = false;
+					done?.();
+					return;
+				}
+				const tl = gsap.timeline({ onComplete: finish });
+				tl.to(items, { yPercent: 40, autoAlpha: 0, duration: 0.3, stagger: 0.025, ease: 'power2.in' }, 0)
+					.to(meta, { autoAlpha: 0, duration: 0.25 }, 0)
+					.to(overlay, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.75, ease: 'power3.inOut' }, 0.12)
+					.set(overlay, { visibility: 'hidden' }, 0.9);
+			};
+
+			toggle.addEventListener('click', () => (open ? closeMenu() : openMenu()));
+			document.addEventListener('keydown', (e) => {
+				if (e.key !== 'Escape' || !open) return;
+				if (busy) {
+					/* menu still animating open — close as soon as it settles */
+					pendingClose = true;
+					return;
+				}
+				closeMenu();
+			});
+
+			links.forEach((link) => {
+				link.addEventListener('click', (e) => {
+					e.preventDefault();
+					const href = link.getAttribute('href');
+					if (!href) return;
+					closeMenu(() => {
+						if (new URL(href, location.href).pathname === location.pathname) return;
+						setTimeout(() => navigate(href), 60);
+					});
+				});
+			});
+		});
+	}
+
+	onBoot(init);
+</script>

@@ -1,0 +1,198 @@
+---
+import { site } from '../data/site';
+interface Props {
+	year: number;
+}
+const { year } = Astro.props;
+const links = [
+	{ no: '01', label: 'Work', href: '/work' },
+	{ no: '02', label: 'About', href: '/about' },
+	{ no: '03', label: 'Contact', href: '/contact' },
+];
+---
+
+<div class="menu" data-menu inert aria-hidden="true">
+	<div class="menu__inner wrap">
+		<nav class="menu__list" aria-label="Menu">
+			{
+				links.map((l) => (
+					<a class="menu-link" data-menu-link data-menu-item href={l.href}>
+						<span class="menu-link__no label num">{l.no}</span>
+						<span class="menu-link__mask"><span class="mi menu-link__txt">{l.label}</span></span>
+						<span class="menu-link__arr" aria-hidden="true">
+							<svg width="34" height="16" viewBox="0 0 34 16" fill="none">
+								<path d="M0 8h32m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="1" />
+							</svg>
+						</span>
+					</a>
+				))
+			}
+		</nav>
+
+		<div class="menu__meta" data-menu-meta>
+			<div class="menu__col">
+				<p class="label">New commissions</p>
+				<a class="menu__mail u-line" href={`mailto:${site.email}`}>{site.email}</a>
+			</div>
+			<div class="menu__col">
+				<p class="label">Elsewhere</p>
+				<a class="menu__social u-line" href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+				<a class="menu__social u-line" href="https://behance.net" target="_blank" rel="noreferrer">Behance</a>
+			</div>
+			<div class="menu__col menu__col--quiet">
+				<p class="label">Studio</p>
+				<p class="menu__place">{site.location}</p>
+				<p class="label">Status</p>
+				<p class="menu__place">{site.availability}</p>
+			</div>
+		</div>
+
+		<div class="menu__foot">
+			<span class="label">© {year} {site.name}</span>
+			<span class="label menu__foot-tag">Visual stories through light</span>
+			<span class="label">{site.location}</span>
+		</div>
+	</div>
+</div>
+
+<style>
+	.menu {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		visibility: hidden;
+		clip-path: inset(0 0 100% 0);
+		background:
+			radial-gradient(120% 90% at 80% 0%, rgb(29 27 24 / 0.9) 0%, transparent 60%),
+			var(--bg);
+		color: var(--fg);
+	}
+	html.menu-open .menu {
+		visibility: visible;
+	}
+
+	.menu__inner {
+		height: 100dvh;
+		display: grid;
+		grid-template-rows: 1fr auto auto;
+		padding-top: 6.2rem;
+		padding-bottom: 1.6rem;
+	}
+
+	.menu__list {
+		align-self: center;
+		border-top: 1px solid var(--hairline);
+	}
+
+	.menu-link {
+		display: grid;
+		grid-template-columns: 4rem 1fr auto;
+		align-items: center;
+		gap: 1.4rem;
+		padding-block: clamp(0.5rem, 2.4vh, 1.1rem);
+		border-bottom: 1px solid var(--hairline);
+		transition: transform 0.7s var(--ease-out-expo);
+	}
+	.menu-link__no {
+		color: var(--mute);
+		transition: color 0.5s ease;
+	}
+	.menu-link__mask {
+		display: block;
+		overflow: clip;
+		padding-block: 0.08em;
+	}	.menu-link__txt {
+		display: block;
+		font-family: var(--font-display);
+		font-weight: 400;
+		font-size: clamp(3rem, 9.5vw, 7.5rem);
+		line-height: 1.02;
+		letter-spacing: 0.005em;
+		transition: font-style 0.001s ease, font-weight 0.001s ease;
+	}
+	.menu-link__arr {
+		opacity: 0;
+		transform: translate(-0.8rem, 0.4rem);
+		transition:
+			opacity 0.5s ease,
+			transform 0.7s var(--ease-out-expo);
+		color: var(--mute);
+	}
+	@media (hover: hover) {
+		.menu-link:hover {
+			transform: translateX(0.6rem);
+		}
+		.menu-link:hover .menu-link__no {
+			color: var(--fg);
+		}
+		.menu-link:hover .menu-link__txt {
+			font-style: italic;
+			font-weight: 300;
+		}
+		.menu-link:hover .menu-link__arr {
+			opacity: 1;
+			transform: translate(0, 0);
+		}
+	}
+
+	.menu__meta {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 2rem;
+		padding-top: 2.4rem;
+		border-top: 1px solid var(--hairline);
+	}
+	.menu__col {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		align-items: flex-start;
+	}
+	.menu__col--quiet {
+		text-align: left;
+	}
+	.menu__mail {
+		font-family: var(--font-display);
+		font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+		font-style: italic;
+		word-break: break-all;
+	}
+	.menu__social {
+		font-size: 0.78rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+	}
+	.menu__place {
+		font-size: 0.82rem;
+		color: var(--mute);
+		margin: 0;
+	}
+
+	.menu__foot {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-top: 1.3rem;
+	}
+	.menu__foot-tag {
+		display: none;
+	}
+
+	@media (min-width: 720px) {
+		.menu__foot-tag {
+			display: block;
+		}
+	}
+	@media (max-width: 640px) {
+		.menu__meta {
+			grid-template-columns: 1fr 1fr;
+		}
+		.menu__col--quiet {
+			display: none;
+		}
+		.menu-link {
+			grid-template-columns: 2.4rem 1fr auto;
+		}
+	}
+</style>

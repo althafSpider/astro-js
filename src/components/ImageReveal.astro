@@ -1,0 +1,78 @@
+---
+import { src, type Photo, type Crop } from '../data/images';
+
+interface Props {
+	photo: Photo;
+	/** tailwind-ish classes for sizing the frame (aspect-*, h-*, w-*, absolute…) */
+	frameClass?: string;
+	/** layout width/height requested from the CDN */
+	width?: number;
+	height?: number;
+	crop?: Crop;
+	loading?: 'lazy' | 'eager';
+	fetchpriority?: 'high' | 'low' | 'auto';
+	decoding?: 'async' | 'sync' | 'auto';
+	sizes?: string;
+	/** clip-path reveal on scroll (adds .fx-img inner scale) */
+	reveal?: boolean;
+	/** subtle scrub parallax of the inner image (px amount) */
+	parallax?: number;
+	/** hover zoom handled by CSS (pair with a .grp ancestor) */
+	grow?: boolean;
+	/** cursor label: e.g. "View" */
+	cursor?: string;
+	/** bottom / full legibility shade over the image */
+	shade?: 'soft' | 'full';
+	alt?: string;
+}
+
+const {
+	photo,
+	frameClass = '',
+	width = 1600,
+	height = 1100,
+	crop,
+	loading = 'lazy',
+	fetchpriority = 'auto',
+	decoding = 'async',
+	sizes = '100vw',
+	reveal = false,
+	parallax,
+	grow = false,
+	cursor,
+	shade,
+	alt,
+} = Astro.props;
+
+const url = src(photo, width, height, crop);
+const imgClass = reveal ? 'fx-img' : '';
+---
+
+<div
+	class:list={['avm', { 'avm--grow': grow, 'is-reveal': reveal }, frameClass]}
+	data-fx={reveal ? 'clip' : undefined}
+	data-par={parallax !== undefined ? String(parallax) : undefined}
+	data-shade={shade}
+	data-cursor={cursor}
+>
+	<img
+		class={imgClass}
+		src={url}
+		alt={alt ?? photo.alt}
+		width={width}
+		height={height}
+		loading={loading}
+		fetchpriority={fetchpriority}
+		decoding={decoding}
+		sizes={sizes}
+	/>
+</div>
+
+<style>
+	.is-reveal {
+		will-change: clip-path;
+	}
+	.is-reveal .fx-img {
+		will-change: transform;
+	}
+</style>

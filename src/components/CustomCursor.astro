@@ -1,0 +1,200 @@
+<div class="cur" data-cur-root aria-hidden="true">
+	<span class="cur__label" data-cur-label>View</span>
+	<span class="cur__dot" data-cur-dot></span>
+</div>
+
+<style>
+	.cur {
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 120;
+		pointer-events: none;
+		opacity: 0;
+	}
+	.cur__dot {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 6px;
+		height: 6px;
+		border-radius: 999px;
+		background: var(--fg);
+		box-shadow: 0 0 0 1px rgb(11 11 11 / 0.35);
+	}
+	.cur__ring {
+		display: none;
+	}
+	.cur__label {
+		position: fixed;
+		top: 0;
+		left: 0;
+		display: grid;
+		place-items: center;
+		border-radius: 999px;
+		background: var(--fg);
+		color: var(--bg);
+		text-align: center;
+		white-space: nowrap;
+		opacity: 0;
+		transform: scale(0.5);
+	}
+
+	/* compact circle chip for short verbs (VIEW / OPEN / DRAG) */
+	.cur__label--chip {
+		width: 88px;
+		height: 88px;
+		font-size: 0.6rem;
+		font-weight: 700;
+		letter-spacing: 0.24em;
+		text-transform: uppercase;
+	}
+
+	/* expanding pill that carries the hovered project's title */
+	.cur__label--title {
+		min-width: 104px;
+		min-height: 104px;
+		padding: 0.4rem 2.3rem;
+		font-family: var(--font-display);
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(1.05rem, 1.7vw, 1.55rem);
+		letter-spacing: 0.012em;
+	}
+
+	@media (pointer: coarse), (hover: none) {
+		.cur {
+			display: none;
+		}
+	}
+</style>
+
+<script>
+	import gsap from 'gsap';
+	import { onBoot, scoped, reducedMotion, finePointer, cleanup } from '../scripts/app';
+
+	const ACTIONABLE = 'a, button, [role="button"], input, textarea, select, summary, label[for], [data-cursor]';
+
+	function init(): void {
+		const root = document.querySelector<HTMLElement>('[data-cur-root]');
+		if (!root) return;
+		if (!finePointer() || reducedMotion()) {
+			document.documentElement.classList.remove('has-cursor');
+			return;
+		}
+
+		const dot = root.querySelector<HTMLElement>('[data-cur-dot]');
+		const label = root.querySelector<HTMLElement>('[data-cur-label]');
+		if (!dot || !label) return;
+
+		/* Only hide the native cursor once the custom one is fully set up;
+		   if anything below throws, the user keeps a working native cursor. */
+		scoped(root, () => {
+			document.documentElement.classList.add('has-cursor');
+
+			gsap.set(label, { xPercent: -50, yPercent: -50, x: -1000, y: -1000, autoAlpha: 0 });
+			gsap.set(dot, { xPercent: -50, yPercent: -50, x: -1000, y: -1000, autoAlpha: 0 });
+
+			const dotX = gsap.quickTo(dot, 'x', { duration: 0.14, ease: 'power2.out' });
+			const dotY = gsap.quickTo(dot, 'y', { duration: 0.14, ease: 'power2.out' });
+			const lbX = gsap.quickTo(label, 'x', { duration: 0.5, ease: 'power3.out' });
+			const lbY = gsap.quickTo(label, 'y', { duration: 0.5, ease: 'power3.out' });
+
+			let shown = false;
+			const state = { mode: 'idle', text: '' };
+
+			/* three presentations:
+			 *   idle  — small dot only
+			 *   chip  — compact circle with a short verb (VIEW / OPEN / DRAG)
+			 *   title — expanding pill carrying the hovered project's name   */
+			const present = (mode: 'chip' | 'title', text: string): void => {
+				label.className = `cur__label cur__label--${mode}`;
+				label.textContent = text;
+				gsap.killTweensOf(label);
+				gsap.fromTo(
+					label,
+					{ autoAlpha: 0, scale: 0.5 },
+					{ autoAlpha: 1, scale: 1, duration: 0.45, ease: 'expo.out' },
+				);
+			};
+
+			const setMode = (mode: 'idle' | 'chip' | 'title', text = ''): void => {
+				if (state.mode === mode && state.text === text) return;
+				state.mode = mode;
+				state.text = text;
+				if (mode === 'idle') {
+					gsap.to(dot, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'power2.out' });
+					gsap.to(label, { autoAlpha: 0, scale: 0.5, duration: 0.28, ease: 'power2.in' });
+				} else {
+					gsap.to(dot, { autoAlpha: 0, scale: 0.4, duration: 0.3, ease: 'power2.in' });
+					present(mode, text);
+				}
+			};
+
+			const onMove = (e: MouseEvent): void => {
+				if (!shown) {
+					shown = true;
+					gsap.set(root, { autoAlpha: 1 });
+					/* nothing hovered yet — reveal the plain dot */
+					if (state.mode === 'idle') {
+						gsap.to(dot, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'power2.out' });
+					}
+				}
+				dotX(e.clientX);
+				dotY(e.clientY);
+				lbX(e.clientX);
+				lbY(e.clientY);
+			};
+
+			const hoverTarget = (e: Event): Element | null => {
+				const t = e.target as Element | null;
+				return t ? t.closest(ACTIONABLE) : null;
+			};
+
+			const onOver = (e: MouseEvent): void => {
+				const el = hoverTarget(e);
+				if (!el) {
+					setMode('idle');
+					return;
+				}
+				const custom = el.closest('[data-cursor]') as HTMLElement | null;
+				const title = custom?.dataset.cursorTitle;
+				const verb = custom?.dataset.cursor;
+				if (title) setMode('title', title);
+				else if (verb) setMode('chip', verb);
+				else setMode('chip', 'Open');
+			};
+
+			const onOut = (e: MouseEvent): void => {
+				const next = e.relatedTarget as Element | null;
+				if (next && next.closest(ACTIONABLE)) return;
+				setMode('idle');
+			};
+
+			const onLeave = (): void => {
+				gsap.to([dot, label], { autoAlpha: 0, duration: 0.3 });
+			};
+			const onEnter = (): void => {
+				shown = false;
+				gsap.to([dot, label], { autoAlpha: 1, duration: 0.4 });
+			};
+
+			window.addEventListener('mousemove', onMove, { passive: true });
+			window.addEventListener('mouseover', onOver, { passive: true });
+			window.addEventListener('mouseout', onOut, { passive: true });
+			document.documentElement.addEventListener('mouseleave', onLeave);
+			document.documentElement.addEventListener('mouseenter', onEnter);
+
+			cleanup(() => {
+				window.removeEventListener('mousemove', onMove);
+				window.removeEventListener('mouseover', onOver);
+				window.removeEventListener('mouseout', onOut);
+				document.documentElement.removeEventListener('mouseleave', onLeave);
+				document.documentElement.removeEventListener('mouseenter', onEnter);
+				document.documentElement.classList.remove('has-cursor');
+			});
+		});
+	}
+
+	onBoot(init);
+</script>

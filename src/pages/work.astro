@@ -1,0 +1,56 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import WorksGrid from '../components/WorksGrid.astro';
+import { projects } from '../data/projects';
+---
+
+<Layout title="Work" description="A collection of visual stories — fashion, portraits, documentary and architecture by Adrian Vale.">
+	<PageIntro
+		kicker="Index — Portfolio"
+		title={['Selected', 'Work']}
+		meta={[`${String(projects.length).padStart(2, '0')} Projects`, '2014 — 2026', 'Fashion · Portrait · Documentary']}
+	/>
+
+	<section class="wrap works-note" aria-label="Browse by discipline">
+		<div class="works-note__line" data-fx="fade"></div>
+		<p class="works-note__txt prose-p" data-fx="fade">
+			A collection of visual stories — commissions, personal series and field
+			notes. Filter by discipline or read the index in order.
+		</p>
+		<p class="works-note__hint label" data-fx="fade">All projects are archived by year</p>
+	</section>
+
+	<WorksGrid />
+</Layout>
+
+<style>
+	.works-note {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1.4rem;
+		padding-top: clamp(2.6rem, 6vh, 4.5rem);
+		padding-bottom: 0.6rem;
+	}
+	.works-note__line {
+		width: 2.4rem;
+		height: 1px;
+		background: var(--fg);
+	}
+	.works-note__txt {
+		margin: 0;
+	}
+	.works-note__hint {
+		margin: 0;
+	}
+	@media (min-width: 768px) {
+		.works-note {
+			grid-template-columns: auto 1fr auto;
+			align-items: center;
+			gap: 2.2rem;
+		}
+		.works-note__txt {
+			max-width: 42ch;
+		}
+	}
+</style>

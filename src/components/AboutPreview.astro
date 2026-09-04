@@ -1,0 +1,181 @@
+---
+import ImageReveal from './ImageReveal.astro';
+import { site } from '../data/site';
+
+const portrait = {
+	slug: 'photo-1500648767791-00dcc994a43e',
+	alt: 'Portrait of the photographer in soft studio light',
+};
+const lines = [
+	{ text: 'I photograph' },
+	{ text: 'the moments', accent: true },
+	{ text: 'that exist' },
+	{ text: 'between' },
+	{ text: 'words.', accent: true },
+];
+const facts = [
+	{ k: 'Name', v: site.name },
+	{ k: 'Location', v: site.location },
+	{ k: 'Specialisation', v: 'Fashion, portrait & documentary' },
+	{ k: 'Years active', v: 'Since 2014' },
+];
+---
+
+<section class="aboutp sec wrap" aria-label="About the photographer">
+	<div class="aboutp__top">
+		<p class="label" data-fx="fade">The photographer</p>
+
+		<h2 class="aboutp__manifesto display display-xl" data-fx-lines>
+			{
+				lines.map((l) => (
+					<span class="l-line">
+						<span class:list={['l-i', { 'it': l.accent }]}>{l.text}</span>
+					</span>
+				))
+			}
+		</h2>
+	</div>
+
+	<div class="aboutp__grid">
+		<figure class="aboutp__media">
+			<ImageReveal
+				photo={portrait}
+				frameClass="w-full aspect-[3/4] max-w-[26rem]"
+				width={1200}
+				height={1600}
+				crop="faces"
+				sizes="(min-width:1024px) 30vw, 80vw"
+				reveal
+			/>
+			<figcaption class="label aboutp__cap" data-fx="fade">
+				<span>{site.name}</span>
+				<span class="aboutp__cap-dot" aria-hidden="true"></span>
+				<span>Self portrait — {site.location}, 2025</span>
+			</figcaption>
+		</figure>
+
+		<div class="aboutp__side">
+			<dl class="aboutp__facts">
+				{
+					facts.map((f) => (
+						<div class="aboutp__fact" data-fx="rise">
+							<dt class="label">{f.k}</dt>
+							<dd>{f.v}</dd>
+						</div>
+					))
+				}
+			</dl>
+			<p class="aboutp__stmt" data-fx="fade">
+				Twenty-plus years behind the camera, chasing the same thing — the fraction of a
+				second where a person stops performing for the light.
+			</p>
+			<a class="aboutp__more grp" href="/about" data-fx="fade">
+				<span class="label label--fg">Read more</span>
+				<span class="aboutp__more-arr" aria-hidden="true">
+					<svg width="44" height="20" viewBox="0 0 44 20" fill="none">
+						<path d="M0 10h42m0 0-8-8m8 8-8 8" stroke="currentColor" stroke-width="1" />
+					</svg>
+				</span>
+			</a>
+		</div>
+	</div>
+</section>
+
+<style>
+	.aboutp {
+		padding-top: clamp(8rem, 16vh, 13rem);
+	}
+
+	.aboutp__top {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(2.5rem, 6vh, 4.5rem);
+		padding-bottom: clamp(4rem, 10vh, 8rem);
+	}
+	.aboutp__manifesto {
+		max-width: 26ch;
+		margin: 0;
+		letter-spacing: -0.015em;
+	}
+
+	.aboutp__grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 3.5rem 0;
+	}
+	.aboutp__media {
+		margin: 0;
+	}
+	.aboutp__cap {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+		margin-top: 1rem;
+	}
+	.aboutp__cap-dot {
+		width: 3px;
+		height: 3px;
+		border-radius: 99px;
+		background: var(--mute);
+	}
+
+	.aboutp__side {
+		display: flex;
+		flex-direction: column;
+		gap: 2.4rem;
+	}
+	.aboutp__facts {
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+	}
+	.aboutp__fact {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1.5rem;
+		padding-block: 1.15rem;
+		border-bottom: 1px solid var(--hairline);
+	}
+	.aboutp__fact dt {
+		color: var(--mute);
+	}
+	.aboutp__fact dd {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(1.15rem, 2vw, 1.6rem);
+		font-style: italic;
+	}
+	.aboutp__stmt {
+		color: var(--mute);
+		max-width: 30rem;
+		line-height: 1.85;
+		margin: 0;
+	}
+	.aboutp__more {
+		display: inline-flex;
+		align-items: center;
+		gap: 1.4rem;
+		align-self: flex-start;
+		padding-bottom: 0.4rem;
+		border-bottom: 1px solid var(--hairline);
+	}
+	.aboutp__more-arr {
+		display: grid;
+		place-items: center;
+		transition: transform 0.7s var(--ease-out-expo);
+	}
+	@media (hover: hover) {
+		.aboutp__more:hover .aboutp__more-arr {
+			transform: translateX(0.7rem);
+		}
+	}
+
+	@media (min-width: 900px) {
+		.aboutp__grid {
+			grid-template-columns: 1fr 1.15fr;
+			column-gap: clamp(3rem, 8vw, 9rem);
+			align-items: end;
+		}
+	}
+</style>

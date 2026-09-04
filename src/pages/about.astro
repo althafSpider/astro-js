@@ -1,0 +1,455 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ImageReveal from '../components/ImageReveal.astro';
+import { site } from '../data/site';
+
+const portrait = {
+	slug: 'photo-1500648767791-00dcc994a43e',
+	alt: 'Portrait of Adrian Vale in soft studio light',
+};
+const manifesto = [
+	{ text: 'Photographer.' },
+	{ text: 'Storyteller.', accent: true },
+	{ text: 'Observer.' },
+];
+const facts = [
+	{ k: 'Name', v: site.name },
+	{ k: 'Based in', v: site.location },
+	{ k: 'Since', v: '2014' },
+	{ k: 'Disciplines', v: 'Fashion · Portrait · Documentary' },
+];
+const services = [
+	{ name: 'Editorial', note: 'Magazines, features, long-form essays' },
+	{ name: 'Fashion', note: 'Campaigns, lookbooks, e-commerce' },
+	{ name: 'Portraits', note: 'Studio & environmental sittings' },
+	{ name: 'Commercial', note: 'Brand, product, art direction' },
+	{ name: 'Architecture', note: 'Interiors, facades, urban studies' },
+	{ name: 'Events', note: 'Private commissions & documentation' },
+];
+const exhibitions = [
+	{ year: '2025', title: 'Nocturne', venue: 'Galerie du Marais', place: 'Paris' },
+	{ year: '2024', title: 'The Quiet Hours', venue: 'Maison de la Photographie', place: 'Lille' },
+	{ year: '2023', title: 'Meridian', venue: 'Fondation Regards', place: 'Marseille' },
+];
+const clients = [
+	'Acme Studio', 'Atelier Nord', 'Maison Lumière', 'The Review', 'Kiosk Magazine', 'Folio Press', 'Studio East', 'Grand Bazar',
+];
+const bio = [
+	{
+		kicker: 'The practice',
+		body: 'Adrian Vale photographs the spaces people occupy between intention and gesture — the fraction of a second where a face stops performing. His work moves between fashion commissions and quiet personal series, between the controlled dark of the studio and the ungovernable dark of a city at night.',
+	},
+	{
+		kicker: 'The approach',
+		body: 'Working slowly and with little equipment, Vale builds each frame around a single source of light and a long conversation. Nothing is rushed: sittings run to hours, series run to years. The prints are made by hand in Paris and the archives are kept the same way the negatives always were — in order, and in the dark.',
+	},
+];
+---
+
+<Layout title="About" description="Adrian Vale — photographer, storyteller and observer working between Paris and everywhere else.">
+	<!-- --------------------------------------------------- opening -->
+	<section class="about-hero wrap">
+		<p class="label" data-fx-lines>
+			<span class="l-line"><span class="l-i">Studio — {site.location}</span></span>
+		</p>
+
+		<div class="about-hero__grid">
+			<div class="about-hero__main">
+				<h1 class="about-hero__title display display-xl" data-fx-lines>
+					{
+						manifesto.map((line) => (
+							<span class="l-line">
+								<span class:list={['l-i', { 'it': line.accent }]}>{line.text}</span>
+							</span>
+						))
+					}
+				</h1>
+				<p class="about-hero__stmt prose-p" data-fx="fade">
+					I look for the moment that exists between words — the pause before a
+					pose, the silence after a sentence. That is where the photograph lives.
+				</p>
+			</div>
+
+			<div class="about-hero__side">
+				<figure class="about-hero__portrait">
+					<ImageReveal
+						photo={portrait}
+						frameClass="w-full aspect-[3/4]"
+						width={1400}
+						height={1800}
+						crop="faces"
+						sizes="(min-width:1024px) 34vw, 90vw"
+						reveal
+						parallax={6}
+					/>
+					<figcaption class="label" data-fx="fade">Self portrait — Paris, 2025</figcaption>
+				</figure>
+
+				<dl class="about-hero__facts">
+					{
+						facts.map((f) => (
+							<div class="about-hero__fact" data-fx="rise">
+								<dt class="label">{f.k}</dt>
+								<dd>{f.v}</dd>
+							</div>
+						))
+					}
+				</dl>
+			</div>
+		</div>
+	</section>
+
+	<!-- ------------------------------------------------ bio columns -->
+	<section class="about-bio wrap">
+		<header class="about-sec-head" data-fx="fade">
+			<p class="label">01 — About</p>
+		</header>
+		<div class="about-bio__cols">
+			{
+				bio.map((b) => (
+					<article class="about-bio__col">
+						<p class="label about-bio__kicker" data-fx="fade">{b.kicker}</p>
+						<p class="about-bio__body" data-fx-lines>
+							<span class="l-line"><span class="l-i">{b.body}</span></span>
+						</p>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<!-- -------------------------------------------------- services -->
+	<section class="about-svc wrap">
+		<header class="about-sec-head" data-fx="fade">
+			<p class="label">02 — Services</p>
+			<p class="label about-sec-head__right">Available for commissions — 2026</p>
+		</header>
+		<ul class="about-svc__list">
+			{
+				services.map((s, i) => (
+					<li class="about-svc__row" data-svc>
+						<span class="about-svc__no label num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+						<h2 class="about-svc__name display display-md" data-fx-lines>
+							<span class="l-line"><span class="l-i">{s.name}</span></span>
+						</h2>
+						<p class="about-svc__note label" data-fx="fade">{s.note}</p>
+						<span class="about-svc__arr label label--fg" aria-hidden="true">
+							<span class="arr">↗</span>
+						</span>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<!-- ----------------------------------------------- exhibitions -->
+	<section class="about-exh wrap">
+		<header class="about-sec-head" data-fx="fade">
+			<p class="label">03 — Exhibitions</p>
+		</header>
+		<ul class="about-exh__list">
+			{
+				exhibitions.map((e, i) => (
+					<li class="about-exh__row" data-fx-lines>
+						<span class="about-exh__year label num l-line"><span class="l-i">{e.year}</span></span>
+						<span class="about-exh__main">
+							<span class="l-line"><span class="l-i"><span class="about-exh__no num">0{i + 1}</span> {e.title}</span></span>
+						</span>
+						<span class="about-exh__venue label l-line"><span class="l-i">{e.venue} — {e.place}</span></span>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<!-- ---------------------------------------------------- clients -->
+	<section class="about-clients wrap">
+		<header class="about-sec-head" data-fx="fade">
+			<p class="label">04 — Selected clients</p>
+			<p class="label about-sec-head__right">2014 — 2026</p>
+		</header>
+		<div class="about-clients__grid">
+			{
+				clients.map((c, i) => (
+					<span class="about-clients__name" data-fx="rise">
+						<span class="about-clients__idx label num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+						{c}
+					</span>
+				))
+			}
+		</div>
+	</section>
+</Layout>
+
+<style>
+	/* ---------------------------------------------------------- hero */
+	.about-hero {
+		padding-top: clamp(7rem, 14vh, 10.5rem);
+		padding-bottom: clamp(4rem, 9vh, 7rem);
+		border-bottom: 1px solid var(--hairline);
+	}
+	.about-hero > .label {
+		padding-bottom: clamp(2.2rem, 5vh, 4rem);
+	}
+	.about-hero__grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 4rem 0;
+	}
+	.about-hero__title {
+		margin: 0 0 clamp(2rem, 5vh, 3.6rem);
+		max-width: 12ch;
+	}
+	.about-hero__stmt {
+		margin: 0;
+		max-width: 34rem;
+	}
+	.about-hero__side {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2.8rem 0;
+	}
+	.about-hero__portrait {
+		margin: 0;
+		max-width: 30rem;
+	}
+	.about-hero__portrait figcaption {
+		margin-top: 1rem;
+		color: var(--mute);
+	}
+	.about-hero__facts {
+		margin: 0;
+		border-top: 1px solid var(--hairline);
+	}
+	.about-hero__fact {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1.5rem;
+		padding-block: 1.1rem;
+		border-bottom: 1px solid var(--hairline);
+	}
+	.about-hero__fact dt {
+		color: var(--mute);
+	}
+	.about-hero__fact dd {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(1.15rem, 2vw, 1.6rem);
+		font-style: italic;
+	}
+
+	@media (min-width: 1024px) {
+		.about-hero__grid {
+			grid-template-columns: 1.2fr 1fr;
+			column-gap: clamp(3rem, 7vw, 8rem);
+		}
+		.about-hero__side {
+			grid-template-columns: 1fr 0.8fr;
+			column-gap: 3rem;
+			align-items: end;
+		}
+		.about-hero__portrait {
+			grid-row: span 2;
+		}
+	}
+
+	/* shared section headers */
+	.about-sec-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 2rem;
+		padding-block: 1.4rem 0;
+		border-top: 1px solid var(--hairline);
+		margin-bottom: clamp(2.6rem, 6vh, 4.5rem);
+	}
+	.about-sec-head .label {
+		color: var(--fg);
+		font-size: 0.74rem;
+		letter-spacing: 0.3em;
+	}
+	.about-sec-head__right {
+		color: var(--mute) !important;
+	}
+	@media (max-width: 640px) {
+		.about-sec-head__right {
+			display: none;
+		}
+	}
+
+	/* --------------------------------------------------------- bio */
+	.about-bio {
+		padding-top: clamp(5rem, 11vh, 8rem);
+		padding-bottom: clamp(5rem, 11vh, 8rem);
+	}
+	.about-bio__cols {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 3rem;
+	}
+	.about-bio__col {
+		display: flex;
+		flex-direction: column;
+		gap: 1.4rem;
+	}
+	.about-bio__kicker {
+		color: var(--mute);
+	}
+	.about-bio__body {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+		line-height: 1.5;
+		font-weight: 400;
+		color: var(--fg);
+	}
+	.about-bio__body .l-line {
+		overflow: clip;
+	}
+	@media (min-width: 900px) {
+		.about-bio__cols {
+			grid-template-columns: 1fr 1fr;
+			column-gap: clamp(2rem, 6vw, 7rem);
+		}
+		.about-bio__col:nth-child(2) {
+			margin-top: clamp(3rem, 8vh, 6rem);
+		}
+	}
+
+	/* ----------------------------------------------------- services */
+	.about-svc {
+		padding-bottom: clamp(5rem, 11vh, 8rem);
+	}
+	.about-svc__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.about-svc__row {
+		display: grid;
+		grid-template-columns: 2.6rem 1fr auto;
+		align-items: center;
+		gap: 1.4rem;
+		padding-block: clamp(1rem, 2.6vh, 1.7rem);
+		border-bottom: 1px solid var(--hairline);
+	}
+	.about-svc__no {
+		color: var(--mute);
+	}
+	.about-svc__name {
+		margin: 0;
+		font-size: clamp(2rem, 5vw, 4.4rem);
+		line-height: 1.05;
+	}
+	.about-svc__name .l-line {
+		overflow: clip;
+	}
+	.about-svc__note {
+		display: none;
+		color: var(--mute);
+		max-width: 16rem;
+	}
+	.about-svc__arr {
+		color: var(--mute);
+		font-size: 1rem;
+		transition: color 0.4s ease;
+	}
+	.about-svc__row:hover .about-svc__arr {
+		color: var(--fg);
+	}
+
+	@media (min-width: 900px) {
+		.about-svc__row {
+			grid-template-columns: 3rem minmax(0, 1fr) 1fr auto;
+		}
+		.about-svc__note {
+			display: block;
+			text-transform: none;
+			font-weight: 500;
+			letter-spacing: 0.02em;
+			font-size: 0.8rem;
+		}
+	}
+
+	/* ------------------------------------------------ exhibitions */
+	.about-exh {
+		padding-bottom: clamp(5rem, 11vh, 8rem);
+	}
+	.about-exh__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.about-exh__row {
+		display: grid;
+		grid-template-columns: 4.5rem 1fr;
+		align-items: baseline;
+		gap: 0.4rem 1.6rem;
+		padding-block: clamp(1.4rem, 3.4vh, 2.4rem);
+		border-bottom: 1px solid var(--hairline);
+	}
+	.about-exh__year {
+		color: var(--mute);
+	}
+	.about-exh__main .l-i {
+		font-family: var(--font-display);
+		font-style: italic;
+		font-size: clamp(1.5rem, 3.2vw, 2.6rem);
+		line-height: 1.2;
+	}
+	.about-exh__no {
+		font-style: normal;
+		font-family: var(--font-ui);
+		font-size: 0.65rem;
+		letter-spacing: 0.22em;
+		color: var(--mute);
+		margin-right: 1rem;
+	}
+	.about-exh__venue {
+		grid-column: 2;
+		color: var(--mute);
+	}
+	@media (min-width: 900px) {
+		.about-exh__row {
+			grid-template-columns: 6rem 1fr 1fr;
+			gap: 0 3rem;
+		}
+		.about-exh__venue {
+			grid-column: 3;
+			text-align: right;
+		}
+	}
+
+	/* ----------------------------------------------------- clients */
+	.about-clients {
+		padding-bottom: clamp(2rem, 4vh, 3rem);
+	}
+	.about-clients__grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		border-top: 1px solid var(--hairline);
+	}
+	.about-clients__name {
+		display: flex;
+		align-items: baseline;
+		gap: 0.9rem;
+		padding-block: clamp(1.1rem, 2.6vh, 1.8rem);
+		padding-right: 1rem;
+		border-bottom: 1px solid var(--hairline);
+		font-family: var(--font-display);
+		font-style: italic;
+		font-size: clamp(1.2rem, 2.2vw, 1.9rem);
+		line-height: 1.2;
+	}
+	.about-clients__idx {
+		color: var(--mute);
+		font-family: var(--font-ui);
+		font-style: normal;
+	}
+	@media (min-width: 900px) {
+		.about-clients__grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+</style>
